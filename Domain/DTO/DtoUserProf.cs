@@ -14,5 +14,6 @@ namespace CampusLove.Domain.DTO
         public bool Verified { get; set; }
         public string? Status { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public DtoPref Preference { get; set; } = new DtoPref();
     }
 }
