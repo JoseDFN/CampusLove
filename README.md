@@ -81,6 +81,12 @@ CREATE TABLE interaction_type (
   CONSTRAINT pk_interaction_type PRIMARY KEY (id)
 );
 
+CREATE TABLE user_type (
+  id SERIAL,
+  description VARCHAR(30)UNIQUE NOT NULL,
+  CONSTRAINT pk_user_type PRIMARY KEY (id)
+)
+
 -- 3. Users and Authentication
 
 CREATE TABLE app_user (
@@ -90,9 +96,11 @@ CREATE TABLE app_user (
   email VARCHAR(100) UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
   gender_id INT NOT NULL,
+  user_type_id INT NOT NULL,
   CONSTRAINT pk_app_user PRIMARY KEY (user_id),
   CONSTRAINT fk_app_user_gender FOREIGN KEY (gender_id)
-    REFERENCES gender(gender_id)
+    REFERENCES gender(gender_id),
+  CONSTRAINT fk_app_user_type FOREIGN KEY (user_type_id) REFERENCES user_type(id)
 );
 
 -- 4. Preferences (including sexual orientation)

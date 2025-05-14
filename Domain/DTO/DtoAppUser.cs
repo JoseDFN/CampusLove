@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CampusLove.Domain.Entities
+namespace CampusLove.Domain.DTO
 {
-    public class AppUser
+    public class DtoAppUser
     {
         public int UserId { get; set; }
         public string? Name { get; set; }
@@ -13,5 +13,7 @@ namespace CampusLove.Domain.Entities
         public string? Email { get; set; }
         public string? PasswordHash { get; set; }
         public int GenderId { get; set; }
+        public DtoAddr Address { get; set; } = new DtoAddr();
+        public DtoUserProf UserProfile { get; set; } = new DtoUserProf();
     }
 }
