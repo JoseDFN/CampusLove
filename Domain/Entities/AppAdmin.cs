@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace CampusLove.Domain.Entities
 {
-    public class AppUser
+    public class AppAdmin
     {
         public int UserId { get; set; }
         public string? Name { get; set; }
@@ -13,6 +13,5 @@ namespace CampusLove.Domain.Entities
         public string? Email { get; set; }
         public string? PasswordHash { get; set; }
         public int GenderId { get; set; }
-        public int UserTypeId { get; set; }
     }
 }
