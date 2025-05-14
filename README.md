@@ -459,7 +459,7 @@ CREATE OR REPLACE PROCEDURE sp_create_app_user(
     p_email          VARCHAR,
     p_password_hash  TEXT,
     p_gender_id      INT,
-    p_user_type_id   INT,
+    p_user_type_id   INT DEFAULT 1,
     -- Parámetros para address
     p_street         VARCHAR,
     p_building_number VARCHAR,
@@ -544,24 +544,22 @@ END;
 $$;
 
 CREATE OR REPLACE PROCEDURE sp_update_app_user(
-    p_user_id      INT,
-    p_name         TEXT,
-    p_age          INT,
-    p_email        TEXT,
+    p_user_id       INT,
+    p_name          TEXT,
+    p_age           INT,
+    p_email         TEXT,
     p_password_hash TEXT,
-    p_gender_id    INT,
-    p_user_type_id INT
+    p_gender_id     INT
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
   UPDATE app_user
      SET name          = COALESCE(NULLIF(trim(p_name), ''), name),
-         age           = age,
+         age           = COALESCE(p_age, age),
          email         = COALESCE(NULLIF(trim(p_email), ''), email),
          password_hash = COALESCE(NULLIF(trim(p_password_hash), ''), password_hash),
-         gender_id     = COALESCE(p_gender_id, gender_id),
-         user_type_id  = COALESCE(p_user_type_id, user_type_id)
+         gender_id     = COALESCE(p_gender_id, gender_id)
    WHERE user_id = p_user_id;
 
   IF NOT FOUND THEN
@@ -569,7 +567,6 @@ BEGIN
   END IF;
 END;
 $$;
-
 
 
 

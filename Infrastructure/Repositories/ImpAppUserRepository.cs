@@ -149,14 +149,13 @@ namespace CampusLove.Infrastructure.Repositories
             using var conn = new NpgsqlConnection(_connectionString);
             conn.Open();
 
-            using var cmd = new NpgsqlCommand("CALL sp_update_app_user(@user_id, @name, @age, @email, @password_hash, @gender_id, @user_type_id);", conn);
+            using var cmd = new NpgsqlCommand("CALL sp_update_app_user(@user_id, @name, @age, @email, @password_hash, @gender_id);", conn);
             cmd.Parameters.AddWithValue("user_id", id);
             cmd.Parameters.AddWithValue("name", dto.Name ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("age", dto.Age);
             cmd.Parameters.AddWithValue("email", dto.Email ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("password_hash", dto.PasswordHash ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("gender_id", dto.GenderId);
-            cmd.Parameters.AddWithValue("user_type_id", dto.UserTypeId);
 
             var affected = cmd.ExecuteNonQuery();
             if (affected == 0)

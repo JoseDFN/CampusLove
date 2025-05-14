@@ -102,7 +102,35 @@ namespace SGCI_app.application.UI
             }
         }
 
-        
+        protected string GetValidatedPassword(string prompt)
+        {
+            Console.Write(prompt);
+            var pwd = string.Empty;
+            ConsoleKey key;
+            do
+            {
+                var keyInfo = Console.ReadKey(intercept: true);
+                key = keyInfo.Key;
+                if (key == ConsoleKey.Backspace && pwd.Length > 0)
+                {
+                    pwd = pwd[0..^1];
+                    Console.Write("\b \b");
+                }
+                else if (!char.IsControl(keyInfo.KeyChar))
+                {
+                    pwd += keyInfo.KeyChar;
+                    Console.Write('*');
+                }
+            } while (key != ConsoleKey.Enter);
+            Console.WriteLine();
+
+            if (string.IsNullOrEmpty(pwd))
+            {
+                ShowErrorMessage("La contraseña no puede estar vacía.");
+                return GetValidatedPassword(prompt);
+            }
+            return pwd;
+        }
 
         protected void DrawSeparator(char character = '-', int length = 50)
         {

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BCrypt.Net;
 using CampusLove.Application.Service;
 using CampusLove.Domain.DTO;
 using CampusLove.Domain.Ports;
@@ -55,27 +56,27 @@ namespace CampusLove.Application.UI
         {
             ShowHeader("CREAR NUEVO USUARIO");
 
-            // Datos principales
             string name = GetValidatedInput("Nombre: ");
             int age = GetValidatedIntInput("Edad: ", 0);
             string email = GetValidatedInput("Email: ");
-            string passwordHash = GetValidatedInput("Password: ");
+
+            // Leer contraseña ocultando entrada
+            string password = GetValidatedPassword("Password: ");
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
+
             int genderId = GetValidatedIntInput("ID Género: ");
             int userTypeId = GetValidatedIntInput("ID Tipo de Usuario: ");
 
-            // Dirección
             string street = GetValidatedInput("Calle: ");
             string buildingNumber = GetValidatedInput("Número de edificio: ");
             string postalCode = GetValidatedInput("Código postal: ");
             int cityId = GetValidatedIntInput("ID Ciudad: ");
             string additionalInfo = GetValidatedInput("Info adicional: ", allowEmpty: true);
 
-            // Preferencias
             int orientationId = GetValidatedIntInput("ID Orientación: ");
             int minAge = GetValidatedIntInput("Edad mínima preferida: ");
             int maxAge = GetValidatedIntInput("Edad máxima preferida: ");
 
-            // Perfil
             string profileText = GetValidatedInput("Texto de perfil: ", allowEmpty: true);
 
             var dto = new DtoAppUser
@@ -124,11 +125,11 @@ namespace CampusLove.Application.UI
 
             // Solo campos actualizables
             string name = GetValidatedInput("Nuevo nombre: ", allowEmpty: true);
-            int age = GetValidatedIntInput("Nueva edad: ", 0);
+            int age = GetValidatedIntInput("Nueva edad: ");
             string email = GetValidatedInput("Nuevo email: ", allowEmpty: true);
-            string passwordHash = GetValidatedInput("Nuevo password hash: ", allowEmpty: true);
+            string password = GetValidatedPassword("Password: ");
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
             int genderId = GetValidatedIntInput("Nuevo ID Género: ");
-            int userTypeId = GetValidatedIntInput("Nuevo ID Tipo de Usuario: ");
 
             var dto = new DtoAppUser
             {
@@ -136,8 +137,7 @@ namespace CampusLove.Application.UI
                 Age = age,
                 Email = string.IsNullOrEmpty(email) ? null : email,
                 PasswordHash = string.IsNullOrEmpty(passwordHash) ? null : passwordHash,
-                GenderId = genderId,
-                UserTypeId = userTypeId
+                GenderId = genderId
             };
 
             try
