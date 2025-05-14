@@ -103,6 +103,16 @@ CREATE TABLE app_user (
   CONSTRAINT fk_app_user_type FOREIGN KEY (user_type_id) REFERENCES user_type(id)
 );
 
+CREATE TABLE app_admin (
+  user_id SERIAL,
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(100) UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  user_type_id INT NOT NULL,
+  CONSTRAINT pk_app_user PRIMARY KEY (user_id),
+  CONSTRAINT fk_app_user_type FOREIGN KEY (user_type_id) REFERENCES user_type(id)
+);
+
 -- 4. Preferences (including sexual orientation)
 
 CREATE TABLE preference (
@@ -434,5 +444,8 @@ INSERT INTO interaction_type (description) VALUES
   ('Like'),
   ('Dislike');
 
+INSERT INTO user_type (description) VALUES
+  ('User'),
+  ('Admin');
 ```
 

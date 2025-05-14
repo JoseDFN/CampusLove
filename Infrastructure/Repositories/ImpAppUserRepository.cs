@@ -26,12 +26,13 @@ namespace CampusLove.Infrastructure.Repositories
                 using (var cmd = new NpgsqlCommand())
                 {
                     cmd.Connection = conn;
-                    cmd.CommandText = @"INSERT INTO app_user (name, age, email, password_hash, gender_id) VALUES (@name, @age, @email, @password_hash, @gender_id)";
+                    cmd.CommandText = @"INSERT INTO app_user (name, age, email, password_hash, gender_id, user_type_id) VALUES (@name, @age, @email, @password_hash, @gender_id, @user_type_id)";
                     cmd.Parameters.AddWithValue("@name", entity.Name is null ? DBNull.Value : entity.Name);
                     cmd.Parameters.AddWithValue("@age", entity.Age);
                     cmd.Parameters.AddWithValue("@email", entity.Email is null ? DBNull.Value : entity.Email);
                     cmd.Parameters.AddWithValue("@password_hash", entity.PasswordHash is null ? DBNull.Value : entity.PasswordHash);
                     cmd.Parameters.AddWithValue("@gender_id", entity.GenderId);
+                    cmd.Parameters.AddWithValue("@user_type_id", entity.UserTypeId);
 
                     cmd.ExecuteNonQuery();
                 }
