@@ -15,7 +15,7 @@ namespace CampusLove.Application.Service
         {
             _repo = repo ?? throw new ArgumentNullException(nameof(repo));
         }
-        public void CrearCareer(Gender gender)
+        public void CrearGenero(Gender gender)
         {
             if (gender == null)
                 throw new ArgumentNullException(nameof(gender));
@@ -23,6 +23,29 @@ namespace CampusLove.Application.Service
                 throw new ArgumentException("El nombre de la carrera no puede estar vacío.", nameof(gender.Description));
 
             _repo.Create(gender);
+        }
+        public void EliminarGenero(int generoId)
+        {
+            if (generoId <= 0)
+                throw new ArgumentException("El ID de carrera debe ser mayor que cero.", nameof(generoId));
+
+            _repo.Delete(generoId);
+        }
+        public void ActualizarGenero(Gender genero)
+        {
+            if (genero == null)
+                throw new ArgumentNullException(nameof(genero));
+            if (genero.GenderId <= 0)
+                throw new ArgumentException("El ID de carrera debe ser mayor que cero.", nameof(genero.GenderId));
+            if (string.IsNullOrWhiteSpace(genero.Description))
+                throw new ArgumentException("El nombre de la carrera no puede estar vacío.", nameof(genero.Description));
+
+            _repo.Update(genero);
+        }
+
+        public List<Gender> ObtenerTodos()
+        {
+            return _repo.GetAll();
         }
     }
 }

@@ -30,4 +30,8 @@ public class ConexDBFactory : IDbfactory
     {
         return new ImpGenderRepository(_connectionString);
     }
+    public IUserTypeRepository CreateUserTypeRepository()
+    {
+        return new ImpUserTypeRepository(_connectionString);
+    }
 }

@@ -18,7 +18,7 @@ namespace CampusLove.Application.UI
         public AppUserMenu() : base(showIntro: false)
         {
             // Cadena de conexión, ajustar según sea necesario
-            string connStr = "Host=localhost;Database=campus_love;Port=5432;Username=postgres;Password=1219;Pooling=true";
+            string connStr = "Host=localhost;Database=campus_love;Port=5432;Username=postgres;Password=campus2023;Pooling=true";
             IAppUserRepository repo = new ImpAppUserRepository(connStr);
             _service = new AppUserService(repo);
         }
