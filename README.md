@@ -449,33 +449,33 @@ INSERT INTO user_type (description) VALUES
   ('Admin');
 ```
 
-## Procedures
+## Procedures And Functions
 
 ```sql
-CREATE OR REPLACE PROCEDURE sp_create_app_user(
-    -- Parámetros para app_user
-    p_name           VARCHAR,
-    p_age            INT,
-    p_email          VARCHAR,
-    p_password_hash  TEXT,
-    p_gender_id      INT,
-    p_user_type_id   INT DEFAULT 1,
-    -- Parámetros para address
-    p_street         VARCHAR,
+CREATE OR REPLACE FUNCTION fn_create_app_user(
+    -- Obligatorios primero
+    p_name            VARCHAR,
+    p_age             INT,
+    p_email           VARCHAR,
+    p_password_hash   TEXT,
+    p_gender_id       INT,
+    p_street          VARCHAR,
     p_building_number VARCHAR,
-    p_postal_code    VARCHAR,
-    p_city_id        INT,
+    p_postal_code     VARCHAR,
+    p_city_id         INT,
     p_additional_info TEXT,
-    -- Parámetros para preference
-    p_orientation_id INT,
-    p_min_age        INT,
-    p_max_age        INT,
-    -- Parámetros para user_profile
-    p_profile_text   TEXT,
-    p_verified       BOOLEAN DEFAULT FALSE,
-    p_status         VARCHAR DEFAULT 'active',
-    p_updated_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    p_orientation_id  INT,
+    p_min_age         INT,
+    p_max_age         INT,
+    p_profile_text    TEXT,
+
+    -- Con valores por defecto al final
+    p_user_type_id    INT DEFAULT 1,
+    p_verified        BOOLEAN DEFAULT FALSE,
+    p_status          VARCHAR DEFAULT 'active',
+    p_updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )
+RETURNS INT
 LANGUAGE plpgsql
 AS $$
 DECLARE
@@ -501,6 +501,8 @@ BEGIN
     -- Insert en user_profile
     INSERT INTO user_profile(user_id, preference_id, profile_text, address_id, verified, status, updated_at)
     VALUES (v_user_id, v_preference_id, p_profile_text, v_address_id, p_verified, p_status, p_updated_at);
+
+    RETURN v_user_id;
 END;
 $$;
 
