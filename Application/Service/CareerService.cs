@@ -16,9 +16,6 @@ namespace CampusLove.Application.Service
             _repo = repo ?? throw new ArgumentNullException(nameof(repo));
         }
 
-        /// <summary>
-        /// Crea una nueva carrera.
-        /// </summary>
         public void CrearCareer(Career career)
         {
             if (career == null)
@@ -29,9 +26,6 @@ namespace CampusLove.Application.Service
             _repo.Create(career);
         }
 
-        /// <summary>
-        /// Elimina la carrera con el id especificado.
-        /// </summary>
         public void EliminarCareer(int careerId)
         {
             if (careerId <= 0)
@@ -40,9 +34,6 @@ namespace CampusLove.Application.Service
             _repo.Delete(careerId);
         }
 
-        /// <summary>
-        /// Actualiza los datos de una carrera existente.
-        /// </summary>
         public void ActualizarCareer(Career career)
         {
             if (career == null)
@@ -55,9 +46,6 @@ namespace CampusLove.Application.Service
             _repo.Update(career);
         }
 
-        /// <summary>
-        /// Obtiene todas las carreras.
-        /// </summary>
         public List<Career> ObtenerTodos()
         {
             return _repo.GetAll();

@@ -16,9 +16,6 @@ namespace CampusLove.Application.Service
             _repo = repo;
         }
 
-        /// <summary>
-        /// Crea un nuevo vínculo User–Career.
-        /// </summary>
         public void CrearUserCareer(UserCareer usercareer)
         {
             if (usercareer == null)
@@ -38,9 +35,6 @@ namespace CampusLove.Application.Service
             _repo.Create(entity);
         }
 
-        /// <summary>
-        /// Elimina un vínculo específico (userId, careerId).
-        /// </summary>
         public void EliminarUserCareer(int userId, int careerId)
         {
             if (userId   <= 0) throw new ArgumentException("El ID de usuario debe ser mayor que cero.", nameof(userId));
@@ -49,9 +43,6 @@ namespace CampusLove.Application.Service
             _repo.Delete(userId, careerId);
         }
 
-        /// <summary>
-        /// Actualiza un vínculo existente: cambia oldCareerId a newCareerId para el userId dado.
-        /// </summary>
         public void ActualizarUserCareer(int userId, int oldCareerId, int newCareerId)
         {
             if (userId       <= 0) throw new ArgumentException("El ID de usuario debe ser mayor que cero.", nameof(userId));
@@ -61,9 +52,6 @@ namespace CampusLove.Application.Service
             _repo.Update(userId, oldCareerId, newCareerId);
         }
 
-        /// <summary>
-        /// Obtiene todos los vínculos User–Career.
-        /// </summary>
         public List<UserCareer> ObtenerTodos()
         {
             var entities = _repo.GetAll();

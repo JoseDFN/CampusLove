@@ -25,4 +25,9 @@ public class ConexDBFactory : IDbfactory
     {
         return new ImpCareerRepository(_connectionString);
     }
+
+    public IGenderRepository CreateGenderRepository()
+    {
+        return new ImpGenderRepository(_connectionString);
+    }
 }

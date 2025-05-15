@@ -17,7 +17,7 @@ namespace CampusLove.ConsoleApp
         public MainMenu() : base(showIntro: true)
         {
             // Connection string - ajusta según tu entorno
-            string connStr = "Host=localhost;Database=campus_love;Port=5432;Username=postgres;Password=1219;Pooling=true";
+            string connStr = "Host=localhost;Database=campus_love;Port=5432;Username=postgres;Password=campus2023;Pooling=true";
 
             _userService = new AppUserService(new ImpAppUserRepository(connStr));
             _careerService = new CareerService(new ImpCareerRepository(connStr));
