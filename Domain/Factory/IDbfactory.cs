@@ -7,4 +7,6 @@ namespace SGCI_app.domain.Factory;
 public interface IDbfactory
 {
     IAppUserRepository CreateAppUserRepository();
+    IUserCareerRepository CreateUserCareerRepository();
+    ICareerRepository CreateCareerRepository();
 }

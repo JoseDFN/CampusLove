@@ -1,11 +1,11 @@
 ﻿using CampusLove.Application.UI;
+using CampusLove.ConsoleApp;
 
 internal class Program
 {
     private static void Main(string[] args)
     {
-        Console.WriteLine("Hello, World!");
-        var userAppMenu = new AppUserMenu();
-        userAppMenu.ShowMenu();
+        var mainMenu = new MainMenu();
+        mainMenu.ShowMenu();
     }
 }

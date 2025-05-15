@@ -52,7 +52,7 @@ namespace CampusLove.Application.UI
             }
         }
 
-        private void CrearUsuario()
+        public int CrearUsuario()
         {
             ShowHeader("CREAR NUEVO USUARIO");
 
@@ -109,12 +109,14 @@ namespace CampusLove.Application.UI
 
             try
             {
-                _service.CrearUsuario(dto);
+                int idUsuario = _service.CrearUsuario(dto);
                 ShowSuccessMessage("Usuario creado exitosamente.");
+                return idUsuario;
             }
             catch (Exception ex)
             {
                 ShowErrorMessage($"Error al crear usuario: {ex.Message}");
+                return -1;
             }
         }
 

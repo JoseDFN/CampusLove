@@ -21,55 +21,69 @@ namespace CampusLove.Infrastructure.Repositories
         }
         public void Create(DtoAppUser dto)
         {
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-            using var cmd = new NpgsqlCommand(@"
-                CALL sp_create_app_user(
-                    p_name         => @name,
-                    p_age          => @age,
-                    p_email        => @email,
-                    p_password_hash=> @password_hash,
-                    p_gender_id    => @gender_id,
-                    p_user_type_id => @user_type_id,
-                    p_street       => @street,
-                    p_building_number => @building_number,
-                    p_postal_code  => @postal_code,
-                    p_city_id      => @city_id,
-                    p_additional_info => @additional_info,
-                    p_orientation_id  => @orientation_id,
-                    p_min_age       => @min_age,
-                    p_max_age       => @max_age,
-                    p_profile_text  => @profile_text
-                );
-            ", conn);
-
-
-            // app_user
-            cmd.Parameters.AddWithValue("name", dto.Name ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("age", dto.Age);
-            cmd.Parameters.AddWithValue("email", dto.Email ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("password_hash", dto.PasswordHash ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("gender_id", dto.GenderId);
-            cmd.Parameters.AddWithValue("user_type_id", dto.UserTypeId);
-
-            // address
-            cmd.Parameters.AddWithValue("street", dto.Address.Street ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("building_number", dto.Address.BuildingNumber ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("postal_code", dto.Address.PostalCode ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("city_id", dto.Address.CityId);
-            cmd.Parameters.AddWithValue("additional_info", dto.Address.AdditionalInfo ?? (object)DBNull.Value);
-
-            // preference
-            cmd.Parameters.AddWithValue("orientation_id", dto.UserProfile.Preference.OrientationId);
-            cmd.Parameters.AddWithValue("min_age", dto.UserProfile.Preference.MinAge);
-            cmd.Parameters.AddWithValue("max_age", dto.UserProfile.Preference.MaxAge);
-
-            // user_profile
-            cmd.Parameters.AddWithValue("profile_text", dto.UserProfile.ProfileText ?? (object)DBNull.Value);
-
-            // Ejecuta el PROCEDURE (sin retorno)
-            cmd.ExecuteNonQuery();
+            throw new NotImplementedException();
         }
+
+        public int create(DtoAppUser dto)
+{
+    using var conn = new NpgsqlConnection(_connectionString);
+    conn.Open();
+
+    using var cmd = new NpgsqlCommand(@"
+        SELECT fn_create_app_user(
+            @name,
+            @age,
+            @email,
+            @password_hash,
+            @gender_id,
+            @street,
+            @building_number,
+            @postal_code,
+            @city_id,
+            @additional_info,
+            @orientation_id,
+            @min_age,
+            @max_age,
+            @profile_text,
+            @user_type_id,
+            @verified,
+            @status,
+            @updated_at
+        );
+    ", conn);
+
+    // app_user
+    cmd.Parameters.AddWithValue("name", dto.Name ?? (object)DBNull.Value);
+    cmd.Parameters.AddWithValue("age", dto.Age);
+    cmd.Parameters.AddWithValue("email", dto.Email ?? (object)DBNull.Value);
+    cmd.Parameters.AddWithValue("password_hash", dto.PasswordHash ?? (object)DBNull.Value);
+    cmd.Parameters.AddWithValue("gender_id", dto.GenderId);
+
+    // address
+    cmd.Parameters.AddWithValue("street", dto.Address.Street ?? (object)DBNull.Value);
+    cmd.Parameters.AddWithValue("building_number", dto.Address.BuildingNumber ?? (object)DBNull.Value);
+    cmd.Parameters.AddWithValue("postal_code", dto.Address.PostalCode ?? (object)DBNull.Value);
+    cmd.Parameters.AddWithValue("city_id", dto.Address.CityId);
+    cmd.Parameters.AddWithValue("additional_info", dto.Address.AdditionalInfo ?? (object)DBNull.Value);
+
+    // preference
+    cmd.Parameters.AddWithValue("orientation_id", dto.UserProfile.Preference.OrientationId);
+    cmd.Parameters.AddWithValue("min_age", dto.UserProfile.Preference.MinAge);
+    cmd.Parameters.AddWithValue("max_age", dto.UserProfile.Preference.MaxAge);
+
+    // user_profile
+    cmd.Parameters.AddWithValue("profile_text", dto.UserProfile.ProfileText ?? (object)DBNull.Value);
+
+    // valores opcionales (defaults)
+    cmd.Parameters.AddWithValue("user_type_id", dto.UserTypeId); // puede ser 1 por defecto
+    cmd.Parameters.AddWithValue("verified", dto.UserProfile.Verified);
+    cmd.Parameters.AddWithValue("status", dto.UserProfile.Status ?? (object)DBNull.Value);
+    cmd.Parameters.AddWithValue("updated_at", dto.UserProfile.UpdatedAt);
+
+    // Ejecuta y retorna el user_id creado
+    var result = cmd.ExecuteScalar();
+    return Convert.ToInt32(result);
+}
 
         public void Delete(int id)
         {

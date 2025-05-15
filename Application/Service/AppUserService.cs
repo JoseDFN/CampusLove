@@ -15,13 +15,18 @@ namespace CampusLove.Application.Service
         {
             _repo = repo;
         }
-        public void CrearUsuario(DtoAppUser dtoAppUser)
+        public int CrearUsuario(DtoAppUser dtoAppUser)
         {
             if (dtoAppUser == null)
                 throw new ArgumentNullException(nameof(dtoAppUser));
 
-            // Aquí podrías agregar lógica de validación adicional antes de llamar al repositorio
-            _repo.Create(dtoAppUser);
+            // Lógica de validación previa, si aplica
+
+            int userId = _repo.create(dtoAppUser);
+
+            // Aquí podrías agregar lógica post-creación, como insertar carreras, intereses, etc.
+
+            return userId;
         }
         public void EliminarUsuario(int userId)
         {
