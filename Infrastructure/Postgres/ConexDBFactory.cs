@@ -13,9 +13,16 @@ public class ConexDBFactory : IDbfactory
     {
         _connectionString = connectionString;
     }
-
     public IAppUserRepository CreateAppUserRepository()
     {
         return new ImpAppUserRepository(_connectionString);
+    }
+    public IUserCareerRepository CreateUserCareerRepository()
+    {
+        return new ImpUserCareerRepository(_connectionString);
+    }
+    public ICareerRepository CreateCareerRepository()
+    {
+        return new ImpCareerRepository(_connectionString);
     }
 }

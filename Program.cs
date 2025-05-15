@@ -1,7 +1,11 @@
-﻿internal class Program
+﻿using CampusLove.Application.UI;
+using CampusLove.ConsoleApp;
+
+internal class Program
 {
     private static void Main(string[] args)
     {
-        Console.WriteLine("Hello, World!");
+        var mainMenu = new MainMenu();
+        mainMenu.ShowMenu();
     }
 }

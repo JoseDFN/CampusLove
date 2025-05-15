@@ -1,14 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CampusLove.Domain.Entities;
+using CampusLove.Domain.DTO;
 using SGCI_app.domain.Ports;
 
 namespace CampusLove.Domain.Ports
 {
-    public interface IAppUserRepository : IGenericRepository<AppUser>
+    public interface IAppUserRepository : IGenericRepository<DtoAppUser>
     {
-        
+        void update (int id, DtoAppUser entity);
+        int create (DtoAppUser entity);
     }
 }

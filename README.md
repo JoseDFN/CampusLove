@@ -85,7 +85,7 @@ CREATE TABLE user_type (
   id SERIAL,
   description VARCHAR(30)UNIQUE NOT NULL,
   CONSTRAINT pk_user_type PRIMARY KEY (id)
-)
+);
 
 -- 3. Users and Authentication
 
@@ -447,5 +447,130 @@ INSERT INTO interaction_type (description) VALUES
 INSERT INTO user_type (description) VALUES
   ('User'),
   ('Admin');
+```
+
+## Procedures And Functions
+
+```sql
+CREATE OR REPLACE FUNCTION fn_create_app_user(
+    -- Obligatorios primero
+    p_name            VARCHAR,
+    p_age             INT,
+    p_email           VARCHAR,
+    p_password_hash   TEXT,
+    p_gender_id       INT,
+    p_street          VARCHAR,
+    p_building_number VARCHAR,
+    p_postal_code     VARCHAR,
+    p_city_id         INT,
+    p_additional_info TEXT,
+    p_orientation_id  INT,
+    p_min_age         INT,
+    p_max_age         INT,
+    p_profile_text    TEXT,
+
+    -- Con valores por defecto al final
+    p_user_type_id    INT DEFAULT 1,
+    p_verified        BOOLEAN DEFAULT FALSE,
+    p_status          VARCHAR DEFAULT 'active',
+    p_updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+RETURNS INT
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_address_id     INT;
+    v_user_id        INT;
+    v_preference_id  INT;
+BEGIN
+    -- Insert en address
+    INSERT INTO address(street, building_number, postal_code, city_id, additional_info)
+    VALUES (p_street, p_building_number, p_postal_code, p_city_id, p_additional_info)
+    RETURNING id INTO v_address_id;
+
+    -- Insert en app_user
+    INSERT INTO app_user(name, age, email, password_hash, gender_id, user_type_id)
+    VALUES (p_name, p_age, p_email, p_password_hash, p_gender_id, p_user_type_id)
+    RETURNING user_id INTO v_user_id;
+
+    -- Insert en preference
+    INSERT INTO preference(orientation_id, min_age, max_age)
+    VALUES (p_orientation_id, p_min_age, p_max_age)
+    RETURNING preference_id INTO v_preference_id;
+
+    -- Insert en user_profile
+    INSERT INTO user_profile(user_id, preference_id, profile_text, address_id, verified, status, updated_at)
+    VALUES (v_user_id, v_preference_id, p_profile_text, v_address_id, p_verified, p_status, p_updated_at);
+
+    RETURN v_user_id;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE sp_delete_app_user(p_user_id INT)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  _addr INT;
+  _pref INT;
+BEGIN
+  -- 1) borrar relaciones N-N
+  DELETE FROM user_career   WHERE user_id = p_user_id;
+  DELETE FROM user_interest WHERE user_id = p_user_id;
+
+  -- 2) obtener address_id y preference_id en variables
+  SELECT address_id, preference_id
+    INTO _addr, _pref
+    FROM user_profile
+   WHERE user_id = p_user_id
+   LIMIT 1;  -- por si acaso hay varias filas, aunque no debería
+
+  -- 3) borrar perfil, preference y address
+  DELETE FROM user_profile WHERE user_id = p_user_id;
+
+  IF _pref IS NOT NULL THEN
+    DELETE FROM preference WHERE preference_id = _pref;
+  END IF;
+
+  IF _addr IS NOT NULL THEN
+    DELETE FROM address WHERE id = _addr;
+  END IF;
+
+  -- 4) borrar el usuario
+  DELETE FROM app_user WHERE user_id = p_user_id;
+
+  -- Opcional: verificar que realmente borró algo
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'No se encontró app_user con user_id = %', p_user_id;
+  END IF;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE sp_update_app_user(
+    p_user_id       INT,
+    p_name          TEXT,
+    p_age           INT,
+    p_email         TEXT,
+    p_password_hash TEXT,
+    p_gender_id     INT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  UPDATE app_user
+     SET name          = COALESCE(NULLIF(trim(p_name), ''), name),
+         age           = COALESCE(p_age, age),
+         email         = COALESCE(NULLIF(trim(p_email), ''), email),
+         password_hash = COALESCE(NULLIF(trim(p_password_hash), ''), password_hash),
+         gender_id     = COALESCE(p_gender_id, gender_id)
+   WHERE user_id = p_user_id;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'No se encontró app_user con user_id = %', p_user_id;
+  END IF;
+END;
+$$;
+
+
+
 ```
 
