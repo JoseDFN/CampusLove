@@ -1,64 +1,57 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Data;
+using Npgsql;
 using CampusLove.Domain.Entities;
 using CampusLove.Domain.Ports;
-using Npgsql;
+using SGCI_app.infrastructure.postgres;
 using SGCI_app.domain.Ports;
 
 namespace CampusLove.Infrastructure.Repositories
 {
     public class ImpCareerRepository : IGenericRepository<Career>, ICareerRepository
     {
-        private readonly string _connectionString;
+        private readonly ConexionSingleton _conexion;
 
         public ImpCareerRepository(string connectionString)
         {
-            _connectionString = connectionString;
+            _conexion = ConexionSingleton.Instancia(connectionString);
         }
 
         public void Create(Career entity)
         {
+            var connection = _conexion.ObtenerConexion();
             const string sql = @"
                 INSERT INTO career (name)
                 VALUES (@name);
             ";
 
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-
-            using var cmd = new NpgsqlCommand(sql, conn);
+            using var cmd = new NpgsqlCommand(sql, connection)
+            {
+                CommandType = CommandType.Text
+            };
             cmd.Parameters.AddWithValue("name", entity.Name ?? (object)DBNull.Value);
 
-            cmd.ExecuteNonQuery();
-        }
-
-        public void Delete(int id)
-        {
-            const string sql = @"
-                DELETE FROM career
-                 WHERE career_id = @id;
-            ";
-
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-
-            using var cmd = new NpgsqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("id", id);
-
-            cmd.ExecuteNonQuery();
+            var rows = cmd.ExecuteNonQuery();
+            if (rows == 0)
+                throw new InvalidOperationException(
+                    $"No se pudo insertar career (name = '{entity.Name}').");
         }
 
         public List<Career> GetAll()
         {
-            const string sql = @"SELECT career_id, name FROM career;";
-
             var list = new List<Career>();
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
+            var connection = _conexion.ObtenerConexion();
+            const string sql = @"
+                SELECT career_id, name
+                  FROM career
+                 ORDER BY career_id;
+            ";
 
-            using var cmd = new NpgsqlCommand(sql, conn);
+            using var cmd = new NpgsqlCommand(sql, connection)
+            {
+                CommandType = CommandType.Text
+            };
             using var rdr = cmd.ExecuteReader();
             while (rdr.Read())
             {
@@ -74,20 +67,44 @@ namespace CampusLove.Infrastructure.Repositories
 
         public void Update(Career entity)
         {
+            var connection = _conexion.ObtenerConexion();
             const string sql = @"
                 UPDATE career
                    SET name = @name
                  WHERE career_id = @id;
             ";
 
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-
-            using var cmd = new NpgsqlCommand(sql, conn);
+            using var cmd = new NpgsqlCommand(sql, connection)
+            {
+                CommandType = CommandType.Text
+            };
             cmd.Parameters.AddWithValue("name", entity.Name ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("id",   entity.CareerId);
 
-            cmd.ExecuteNonQuery();
+            var rows = cmd.ExecuteNonQuery();
+            if (rows == 0)
+                throw new InvalidOperationException(
+                    $"No se encontró career con id = {entity.CareerId} para actualizar.");
+        }
+
+        public void Delete(int id)
+        {
+            var connection = _conexion.ObtenerConexion();
+            const string sql = @"
+                DELETE FROM career
+                 WHERE career_id = @id;
+            ";
+
+            using var cmd = new NpgsqlCommand(sql, connection)
+            {
+                CommandType = CommandType.Text
+            };
+            cmd.Parameters.AddWithValue("id", id);
+
+            var rows = cmd.ExecuteNonQuery();
+            if (rows == 0)
+                throw new InvalidOperationException(
+                    $"No se encontró career con id = {id} para eliminar.");
         }
     }
 }

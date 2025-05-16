@@ -10,4 +10,7 @@ public interface IDbfactory
     IUserCareerRepository CreateUserCareerRepository();
     ICareerRepository CreateCareerRepository();
     IGenderRepository CreateGenderRepository();
+    IUserTypeRepository CreateUserTypeRepository();
+    ICityRepository CreateCityRepository();
+    ISexualOrientationRepository CreateSexualOrientationRepository();
 }
