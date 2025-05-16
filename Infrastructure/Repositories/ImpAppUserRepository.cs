@@ -52,37 +52,37 @@ namespace CampusLove.Infrastructure.Repositories
             {
                 var dto = new DtoAppUser
                 {
-                    UserId       = rdr.GetInt32(0),
-                    Name         = rdr.IsDBNull(1) ? null : rdr.GetString(1),
-                    Age          = rdr.GetInt32(2),
-                    Email        = rdr.IsDBNull(3) ? null : rdr.GetString(3),
-                    PasswordHash = rdr.IsDBNull(4) ? null : rdr.GetString(4),
-                    GenderId     = rdr.GetInt32(5),
-                    UserTypeId   = rdr.GetInt32(6),
-                    Address = new DtoAddr
+                    UserId = rdr.GetInt32(0),
+                    Name = rdr.IsDBNull(1) ? string.Empty : rdr.GetString(1),
+                    Age = rdr.GetInt32(2),
+                    Email = rdr.IsDBNull(3) ? string.Empty : rdr.GetString(3),
+                    PasswordHash = rdr.IsDBNull(4) ? string.Empty : rdr.GetString(4),
+                    GenderId = rdr.GetInt32(5),
+                    UserTypeId = rdr.GetInt32(6),
+                    Address = rdr.IsDBNull(7) ? new DtoAddr() : new DtoAddr
                     {
-                        Id              = rdr.GetInt32(7),
-                        Street          = rdr.IsDBNull(8)  ? null : rdr.GetString(8),
-                        BuildingNumber  = rdr.IsDBNull(9)  ? null : rdr.GetString(9),
-                        PostalCode      = rdr.IsDBNull(10) ? null : rdr.GetString(10),
-                        CityId          = rdr.GetInt32(11),
-                        AdditionalInfo  = rdr.IsDBNull(12) ? null : rdr.GetString(12),
+                        Id = rdr.GetInt32(7),
+                        Street = rdr.IsDBNull(8) ? string.Empty : rdr.GetString(8),
+                        BuildingNumber = rdr.IsDBNull(9) ? string.Empty : rdr.GetString(9),
+                        PostalCode = rdr.IsDBNull(10) ? string.Empty : rdr.GetString(10),
+                        CityId = rdr.GetInt32(11),
+                        AdditionalInfo = rdr.IsDBNull(12) ? string.Empty : rdr.GetString(12),
                     },
-                    UserProfile = new DtoUserProf
+                    UserProfile = rdr.IsDBNull(13) ? new DtoUserProf() : new DtoUserProf
                     {
-                        UserId        = rdr.GetInt32(0),
-                        PreferenceId  = rdr.GetInt32(13),
-                        Preference    = new DtoPref
+                        UserId = rdr.GetInt32(0),
+                        PreferenceId = rdr.GetInt32(13),
+                        Preference = new DtoPref
                         {
-                            Id            = rdr.GetInt32(13),
+                            Id = rdr.GetInt32(13),
                             OrientationId = rdr.GetInt32(14),
-                            MinAge        = rdr.GetInt32(15),
-                            MaxAge        = rdr.GetInt32(16)
+                            MinAge = rdr.GetInt32(15),
+                            MaxAge = rdr.GetInt32(16)
                         },
-                        ProfileText   = rdr.IsDBNull(17) ? null : rdr.GetString(17),
-                        Verified      = rdr.GetBoolean(18),
-                        Status        = rdr.IsDBNull(19) ? null : rdr.GetString(19),
-                        UpdatedAt     = rdr.GetDateTime(20)
+                        ProfileText = rdr.IsDBNull(17) ? string.Empty : rdr.GetString(17),
+                        Verified = rdr.GetBoolean(18),
+                        Status = rdr.IsDBNull(19) ? string.Empty : rdr.GetString(19),
+                        UpdatedAt = rdr.GetDateTime(20)
                     }
                 };
                 list.Add(dto);
@@ -174,23 +174,23 @@ namespace CampusLove.Infrastructure.Repositories
 
             using var cmd = new NpgsqlCommand(sql, conn) { CommandType = CommandType.Text };
             // Parámetros de app_user
-            cmd.Parameters.AddWithValue("name",           dto.Name ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("age",            dto.Age);
-            cmd.Parameters.AddWithValue("email",          dto.Email ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("password_hash",  dto.PasswordHash ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("gender_id",      dto.GenderId);
+            cmd.Parameters.AddWithValue("name", dto.Name ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("age", dto.Age);
+            cmd.Parameters.AddWithValue("email", dto.Email ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("password_hash", dto.PasswordHash ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("gender_id", dto.GenderId);
             // Parámetros de address
-            cmd.Parameters.AddWithValue("street",         dto.Address.Street ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("building_number",dto.Address.BuildingNumber ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("postal_code",    dto.Address.PostalCode ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("city_id",        dto.Address.CityId);
-            cmd.Parameters.AddWithValue("additional_info",dto.Address.AdditionalInfo ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("street", dto.Address.Street ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("building_number", dto.Address.BuildingNumber ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("postal_code", dto.Address.PostalCode ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("city_id", dto.Address.CityId);
+            cmd.Parameters.AddWithValue("additional_info", dto.Address.AdditionalInfo ?? (object)DBNull.Value);
             // Parámetros de preference
             cmd.Parameters.AddWithValue("orientation_id", dto.UserProfile.Preference.OrientationId);
-            cmd.Parameters.AddWithValue("min_age",        dto.UserProfile.Preference.MinAge);
-            cmd.Parameters.AddWithValue("max_age",        dto.UserProfile.Preference.MaxAge);
+            cmd.Parameters.AddWithValue("min_age", dto.UserProfile.Preference.MinAge);
+            cmd.Parameters.AddWithValue("max_age", dto.UserProfile.Preference.MaxAge);
             // Parámetros de user_profile
-            cmd.Parameters.AddWithValue("profile_text",   dto.UserProfile.ProfileText ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("profile_text", dto.UserProfile.ProfileText ?? (object)DBNull.Value);
 
             var result = cmd.ExecuteScalar();
             return Convert.ToInt32(result);
@@ -205,16 +205,77 @@ namespace CampusLove.Infrastructure.Repositories
                 );
             ";
             using var cmd = new NpgsqlCommand(sql, conn) { CommandType = CommandType.Text };
-            cmd.Parameters.AddWithValue("user_id",       id);
-            cmd.Parameters.AddWithValue("name",          dto.Name ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("age",           dto.Age);
-            cmd.Parameters.AddWithValue("email",         dto.Email ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("user_id", id);
+            cmd.Parameters.AddWithValue("name", dto.Name ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("age", dto.Age);
+            cmd.Parameters.AddWithValue("email", dto.Email ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("password_hash", dto.PasswordHash ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("gender_id",     dto.GenderId);
+            cmd.Parameters.AddWithValue("gender_id", dto.GenderId);
 
             var affected = cmd.ExecuteNonQuery();
             if (affected == 0)
                 throw new InvalidOperationException($"No se encontró app_user con id = {id} para actualizar.");
         }
+        
+        public DtoAppUser ObtenerUsuarioPorEmail(string email)
+        {
+            var conn = _conexion.ObtenerConexion();
+            const string sql = @"
+                SELECT
+                    u.user_id, u.name, u.age, u.email, u.password_hash, u.gender_id, u.user_type_id,
+                    a.id AS addr_id, a.street, a.building_number, a.postal_code, a.city_id, a.additional_info,
+                    p.preference_id, p.orientation_id, p.min_age, p.max_age,
+                    up.profile_text, up.verified, up.status, up.updated_at
+                FROM app_user u
+                LEFT JOIN user_profile up ON u.user_id = up.user_id
+                LEFT JOIN address a ON up.address_id = a.id
+                LEFT JOIN preference p ON up.preference_id = p.preference_id
+                WHERE u.email = @correo;
+            ";
+
+            using var cmd = new NpgsqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("correo", email);
+            using var rdr = cmd.ExecuteReader();
+            if (rdr.Read())
+            {
+                return new DtoAppUser
+                {
+                    UserId = rdr.GetInt32(0),
+                    Name = rdr.IsDBNull(1) ? string.Empty : rdr.GetString(1),
+                    Age = rdr.GetInt32(2),
+                    Email = rdr.IsDBNull(3) ? string.Empty : rdr.GetString(3),
+                    PasswordHash = rdr.IsDBNull(4) ? string.Empty : rdr.GetString(4),
+                    GenderId = rdr.GetInt32(5),
+                    UserTypeId = rdr.GetInt32(6),
+                    Address = rdr.IsDBNull(7) ? new DtoAddr() : new DtoAddr
+                    {
+                        Id = rdr.GetInt32(7),
+                        Street = rdr.IsDBNull(8) ? string.Empty : rdr.GetString(8),
+                        BuildingNumber = rdr.IsDBNull(9) ? string.Empty : rdr.GetString(9),
+                        PostalCode = rdr.IsDBNull(10) ? string.Empty : rdr.GetString(10),
+                        CityId = rdr.GetInt32(11),
+                        AdditionalInfo = rdr.IsDBNull(12) ? string.Empty : rdr.GetString(12),
+                    },
+                    UserProfile = rdr.IsDBNull(13) ? new DtoUserProf() : new DtoUserProf
+                    {
+                        UserId = rdr.GetInt32(0),
+                        PreferenceId = rdr.GetInt32(13),
+                        Preference = new DtoPref
+                        {
+                            Id = rdr.GetInt32(13),
+                            OrientationId = rdr.GetInt32(14),
+                            MinAge = rdr.GetInt32(15),
+                            MaxAge = rdr.GetInt32(16),
+                        },
+                        ProfileText = rdr.IsDBNull(17) ? string.Empty : rdr.GetString(17),
+                        Verified = rdr.GetBoolean(18),
+                        Status = rdr.IsDBNull(19) ? string.Empty : rdr.GetString(19),
+                        UpdatedAt = rdr.GetDateTime(20)
+                    }
+                };
+            }
+            return null!;
+        }
+
     }
 }

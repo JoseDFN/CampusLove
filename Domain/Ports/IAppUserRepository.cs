@@ -5,7 +5,9 @@ namespace CampusLove.Domain.Ports
 {
     public interface IAppUserRepository : IGenericRepository<DtoAppUser>
     {
-        void update (int id, DtoAppUser entity);
-        int create (DtoAppUser entity);
+        void update(int id, DtoAppUser entity);
+        int create(DtoAppUser entity);
+        DtoAppUser ObtenerUsuarioPorEmail(string email);
+
     }
 }
