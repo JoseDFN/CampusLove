@@ -46,5 +46,13 @@ namespace CampusLove.Application.Service
             _repo.update(userId, dtoAppUser);
         }
 
+        public DtoAppUser ObtenerUsuarioPorEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                throw new ArgumentException("El email no puede estar vacío.", nameof(email));
+
+            return _repo.ObtenerUsuarioPorEmail(email);
+        }
+
     }
 }

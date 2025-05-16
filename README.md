@@ -103,16 +103,6 @@ CREATE TABLE app_user (
   CONSTRAINT fk_app_user_type FOREIGN KEY (user_type_id) REFERENCES user_type(id)
 );
 
-CREATE TABLE app_admin (
-  user_id SERIAL,
-  name VARCHAR(100) NOT NULL,
-  email VARCHAR(100) UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
-  user_type_id INT NOT NULL,
-  CONSTRAINT pk_app_user PRIMARY KEY (user_id),
-  CONSTRAINT fk_app_user_type FOREIGN KEY (user_type_id) REFERENCES user_type(id)
-);
-
 -- 4. Preferences (including sexual orientation)
 
 CREATE TABLE preference (
@@ -447,6 +437,15 @@ INSERT INTO interaction_type (description) VALUES
 INSERT INTO user_type (description) VALUES
   ('User'),
   ('Admin');
+
+-- ========================================================
+-- DML: Insert Admin User
+-- Tables: app_user
+-- ========================================================
+
+-- 1. Insert admin user (password '1234' hashed with BCrypt)
+INSERT INTO app_user (name, age, email, password_hash, gender_id, user_type_id)
+VALUES ('Admin', 30, 'admin', '$2a$11$SORgL6cP0GuiK1phmFzTY.V.J857dzWysZ9XlalOG/HzMi5jKYrAm', 1, 2);
 ```
 
 ## Procedures And Functions
