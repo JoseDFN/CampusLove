@@ -216,6 +216,154 @@ namespace CampusLove.Infrastructure.Repositories
             if (affected == 0)
                 throw new InvalidOperationException($"No se encontró app_user con id = {id} para actualizar.");
         }
+
+        public List<DtoAppUser> GetFeedCandidates(int currentUserId)
+        {
+            var candidates = new List<DtoAppUser>();
+            var conn = _conexion.ObtenerConexion();
+
+            // 1) Leemos preferencias, ciudad y género del usuario actual
+            int orientationId, minAge, maxAge, cityId, userGenderId;
+            const string prefSql = @"
+                SELECT
+                    p.orientation_id,
+                    p.min_age,
+                    p.max_age,
+                    a.city_id,
+                    u.gender_id
+                FROM app_user u
+                JOIN user_profile up   ON u.user_id     = up.user_id
+                JOIN preference p      ON up.preference_id = p.preference_id
+                JOIN address a         ON up.address_id    = a.id
+                WHERE u.user_id = @uid;
+            ";
+            using (var prefCmd = new Npgsql.NpgsqlCommand(prefSql, conn))
+            {
+                prefCmd.Parameters.AddWithValue("uid", currentUserId);
+                using var rdr = prefCmd.ExecuteReader();
+                if (!rdr.Read())
+                    return candidates;  // sin perfil o usuario inexistente
+
+                orientationId = rdr.GetInt32(0);
+                minAge = rdr.GetInt32(1);
+                maxAge = rdr.GetInt32(2);
+                cityId = rdr.GetInt32(3);
+                userGenderId = rdr.GetInt32(4);
+            }
+
+            // 2) Construimos la lista de géneros que busca el usuario
+            List<int> targetGenders;
+            switch (orientationId)
+            {
+                case 1: // Heterosexual
+                        // Si es hombre (1), busca mujeres (2); si es mujer (2), busca hombres (1)
+                    targetGenders = userGenderId == 1
+                        ? new List<int> { 2 }
+                        : new List<int> { 1 };
+                    break;
+                case 2: // Homosexual
+                        // Busca su mismo género
+                    targetGenders = new List<int> { userGenderId };
+                    break;
+                case 3: // Bisexual
+                        // Ambos géneros
+                    targetGenders = new List<int> { 1, 2 };
+                    break;
+                default:
+                    // Cualquier otro caso, mostrar todos
+                    targetGenders = new List<int> { 1, 2 };
+                    break;
+            }
+
+            // 3) Obtenemos los candidatos con conteo de intereses en común
+            const string sql = @"
+        SELECT
+            u.user_id, u.name,       u.age,    u.email, u.password_hash, u.gender_id, u.user_type_id,
+            a.id         AS addr_id, a.street, a.building_number, a.postal_code, a.city_id, a.additional_info,
+            up.preference_id, p.orientation_id, p.min_age, p.max_age,
+            up.profile_text, up.verified, up.status, up.updated_at,
+            COUNT(ui.interest_id) AS common_interest_count
+        FROM app_user u
+        JOIN user_profile up   ON u.user_id       = up.user_id
+        JOIN address a          ON up.address_id   = a.id
+        JOIN preference p       ON up.preference_id = p.preference_id
+        LEFT JOIN user_interest ui
+          ON ui.user_id = u.user_id
+         AND ui.interest_id IN (
+             SELECT interest_id
+               FROM user_interest
+              WHERE user_id = @uid
+         )
+        WHERE u.user_id       <> @uid
+          AND u.age           BETWEEN @minAge AND @maxAge
+          AND a.city_id        = @cityId
+          AND u.gender_id      = ANY(@genders)
+        GROUP BY
+            u.user_id, u.name, u.age, u.email, u.password_hash, u.gender_id, u.user_type_id,
+            a.id, a.street, a.building_number, a.postal_code, a.city_id, a.additional_info,
+            up.preference_id, p.orientation_id, p.min_age, p.max_age,
+            up.profile_text, up.verified, up.status, up.updated_at;
+    ";
+
+            using var cmd = new Npgsql.NpgsqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("uid", currentUserId);
+            cmd.Parameters.AddWithValue("minAge", minAge);
+            cmd.Parameters.AddWithValue("maxAge", maxAge);
+            cmd.Parameters.AddWithValue("cityId", cityId);
+            // Parámetro array de géneros
+            cmd.Parameters.Add(
+                new Npgsql.NpgsqlParameter("genders", NpgsqlTypes.NpgsqlDbType.Array | NpgsqlTypes.NpgsqlDbType.Integer)
+                {
+                    Value = targetGenders.ToArray()
+                }
+            );
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                var dto = new DtoAppUser
+                {
+                    UserId = reader.GetInt32(0),
+                    Name = reader.IsDBNull(1) ? null : reader.GetString(1),
+                    Age = reader.GetInt32(2),
+                    Email = reader.IsDBNull(3) ? null : reader.GetString(3),
+                    PasswordHash = reader.IsDBNull(4) ? null : reader.GetString(4),
+                    GenderId = reader.GetInt32(5),
+                    UserTypeId = reader.GetInt32(6),
+
+                    Address = new DtoAddr
+                    {
+                        Id = reader.GetInt32(7),
+                        Street = reader.IsDBNull(8) ? null : reader.GetString(8),
+                        BuildingNumber = reader.IsDBNull(9) ? null : reader.GetString(9),
+                        PostalCode = reader.IsDBNull(10) ? null : reader.GetString(10),
+                        CityId = reader.GetInt32(11),
+                        AdditionalInfo = reader.IsDBNull(12) ? null : reader.GetString(12),
+                    },
+
+                    UserProfile = new DtoUserProf
+                    {
+                        UserId = reader.GetInt32(0),
+                        PreferenceId = reader.GetInt32(13),
+                        Preference = new DtoPref
+                        {
+                            Id = reader.GetInt32(13),
+                            OrientationId = reader.GetInt32(14),
+                            MinAge = reader.GetInt32(15),
+                            MaxAge = reader.GetInt32(16),
+                        },
+                        ProfileText = reader.IsDBNull(17) ? null : reader.GetString(17),
+                        Verified = reader.GetBoolean(18),
+                        Status = reader.IsDBNull(19) ? null : reader.GetString(19),
+                        UpdatedAt = reader.GetDateTime(20),
+                        CommonInterestCount = reader.GetInt32(21)
+                    }
+                };
+                candidates.Add(dto);
+            }
+
+            return candidates;
+        }
         
         public DtoAppUser ObtenerUsuarioPorEmail(string email)
         {
