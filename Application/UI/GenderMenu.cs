@@ -108,23 +108,11 @@ namespace CampusLove.Application.UI
             ShowHeader("LISTADO DE GÉNEROS");
             try
             {
-                var list = _service.ObtenerTodos();
-                if (list.Count == 0)
-                {
-                    Console.WriteLine("No hay géneros registrados.");
-                }
-                else
-                {
-                    Console.WriteLine("ID\tDescripción");
-                    foreach (var g in list)
-                    {
-                        Console.WriteLine($"{g.GenderId}\t{g.Description}");
-                    }
-                }
+                _service.MostrarTodos();
             }
             catch (Exception ex)
             {
-                ShowErrorMessage($"Error al obtener listado de géneros: {ex.Message}");
+                ShowErrorMessage($"Error al listar géneros: {ex.Message}");
             }
         }
     }

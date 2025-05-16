@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CampusLove.Domain.Entities;
+using CampusLove.Domain.Ports;
 using SGCI_app.domain.Ports;
 
 namespace CampusLove.Application.Service
 {
     public class GenderService
     {
-        private readonly IGenericRepository<Gender> _repo;
+        private readonly IGenderRepository _repo;
 
-        public GenderService(IGenericRepository<Gender> repo)
+        public GenderService(IGenderRepository repo)
         {
-            _repo = repo ?? throw new ArgumentNullException(nameof(repo));
+            _repo = repo;
         }
         public void CrearGenero(Gender gender)
         {
@@ -43,9 +44,20 @@ namespace CampusLove.Application.Service
             _repo.Update(genero);
         }
 
-        public List<Gender> ObtenerTodos()
+        public void MostrarTodos()
         {
-            return _repo.GetAll();
+            var lista = _repo.GetAll();
+            if (lista.Count == 0)
+            {
+                Console.WriteLine("No hay géneros registrados.");
+                return;
+            }
+
+            Console.WriteLine("ID\tDescripción");
+            foreach (var g in lista)
+            {
+                Console.WriteLine($"{g.GenderId}\t{g.Description}");
+            }
         }
     }
 }
