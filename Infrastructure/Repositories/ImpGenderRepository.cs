@@ -1,71 +1,64 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Data;
+using Npgsql;
 using CampusLove.Domain.Entities;
 using CampusLove.Domain.Ports;
-using Npgsql;
+using SGCI_app.infrastructure.postgres;
 using SGCI_app.domain.Ports;
 
 namespace CampusLove.Infrastructure.Repositories
 {
     public class ImpGenderRepository : IGenericRepository<Gender>, IGenderRepository
     {
-        private readonly string _connectionString;
+        private readonly ConexionSingleton _conexion;
 
         public ImpGenderRepository(string connectionString)
         {
-            _connectionString = connectionString;
+            _conexion = ConexionSingleton.Instancia(connectionString);
         }
 
         public void Create(Gender entity)
         {
+            var connection = _conexion.ObtenerConexion();
             const string sql = @"
                 INSERT INTO gender (description)
                 VALUES (@description);
             ";
 
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-
-            using var cmd = new NpgsqlCommand(sql, conn);
+            using var cmd = new NpgsqlCommand(sql, connection)
+            {
+                CommandType = CommandType.Text
+            };
             cmd.Parameters.AddWithValue("description", entity.Description ?? (object)DBNull.Value);
 
-            cmd.ExecuteNonQuery();
-        }
-
-        public void Delete(int id)
-        {
-            const string sql = @"
-                DELETE FROM gender
-                 WHERE gender_id = @id;
-            ";
-
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-
-            using var cmd = new NpgsqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("id", id);
-
-            cmd.ExecuteNonQuery();
+            var rows = cmd.ExecuteNonQuery();
+            if (rows == 0)
+                throw new InvalidOperationException(
+                    $"No se pudo insertar gender (description = '{entity.Description}').");
         }
 
         public List<Gender> GetAll()
         {
-            const string sql = @"SELECT career_id, name FROM career;";
-
             var list = new List<Gender>();
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
+            var connection = _conexion.ObtenerConexion();
+            const string sql = @"
+                SELECT gender_id, description
+                  FROM gender
+                 ORDER BY gender_id;
+            ";
 
-            using var cmd = new NpgsqlCommand(sql, conn);
+            using var cmd = new NpgsqlCommand(sql, connection)
+            {
+                CommandType = CommandType.Text
+            };
             using var rdr = cmd.ExecuteReader();
             while (rdr.Read())
             {
                 list.Add(new Gender
                 {
-                    GenderId = rdr.GetInt32(0),
-                    Description     = rdr.IsDBNull(1) ? null : rdr.GetString(1)
+                    GenderId    = rdr.GetInt32(0),
+                    Description = rdr.IsDBNull(1) ? null : rdr.GetString(1)
                 });
             }
 
@@ -74,20 +67,44 @@ namespace CampusLove.Infrastructure.Repositories
 
         public void Update(Gender entity)
         {
+            var connection = _conexion.ObtenerConexion();
             const string sql = @"
                 UPDATE gender
                    SET description = @description
                  WHERE gender_id = @id;
             ";
 
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-
-            using var cmd = new NpgsqlCommand(sql, conn);
+            using var cmd = new NpgsqlCommand(sql, connection)
+            {
+                CommandType = CommandType.Text
+            };
             cmd.Parameters.AddWithValue("description", entity.Description ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("id",   entity.GenderId);
+            cmd.Parameters.AddWithValue("id",          entity.GenderId);
 
-            cmd.ExecuteNonQuery();
+            var rows = cmd.ExecuteNonQuery();
+            if (rows == 0)
+                throw new InvalidOperationException(
+                    $"No se encontró gender con id = {entity.GenderId} para actualizar.");
+        }
+
+        public void Delete(int id)
+        {
+            var connection = _conexion.ObtenerConexion();
+            const string sql = @"
+                DELETE FROM gender
+                 WHERE gender_id = @id;
+            ";
+
+            using var cmd = new NpgsqlCommand(sql, connection)
+            {
+                CommandType = CommandType.Text
+            };
+            cmd.Parameters.AddWithValue("id", id);
+
+            var rows = cmd.ExecuteNonQuery();
+            if (rows == 0)
+                throw new InvalidOperationException(
+                    $"No se encontró gender con id = {id} para eliminar.");
         }
     }
 }
