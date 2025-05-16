@@ -82,6 +82,8 @@ namespace CampusLove.Application.UI
             int cityId = GetValidatedIntInput("ID Ciudad: ");
             string additionalInfo = GetValidatedInput("Info adicional: ", allowEmpty: true);
             Console.Clear();
+            var sexualOrientationMenu = new SexualOrientationMenu();
+            sexualOrientationMenu.ListarOrientaciones();
             int orientationId = GetValidatedIntInput("ID Orientación: ");
             int minAge = GetValidatedIntInput("Edad mínima preferida: ");
             int maxAge = GetValidatedIntInput("Edad máxima preferida: ");
