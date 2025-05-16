@@ -9,43 +9,44 @@ using SGCI_app.domain.Ports;
 
 namespace CampusLove.Infrastructure.Repositories
 {
-    public class ImpGenderRepository : IGenericRepository<Gender>, IGenderRepository
+    public class ImpCityRepository : IGenericRepository<City>, ICityRepository
     {
         private readonly ConexionSingleton _conexion;
 
-        public ImpGenderRepository(string connectionString)
+        public ImpCityRepository(string connectionString)
         {
             _conexion = ConexionSingleton.Instancia(connectionString);
         }
 
-        public void Create(Gender entity)
+        public void Create(City entity)
         {
             var connection = _conexion.ObtenerConexion();
             const string sql = @"
-                INSERT INTO gender (description)
-                VALUES (@description);
+                INSERT INTO city (name, region_id)
+                VALUES (@name, @regionId);
             ";
 
             using var cmd = new NpgsqlCommand(sql, connection)
             {
                 CommandType = CommandType.Text
             };
-            cmd.Parameters.AddWithValue("description", entity.Description ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("name",      entity.Name  ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("regionId",  entity.RegionId);
 
             var rows = cmd.ExecuteNonQuery();
             if (rows == 0)
                 throw new InvalidOperationException(
-                    $"No se pudo insertar gender (description = '{entity.Description}').");
+                    $"No se pudo insertar city (name = '{entity.Name}', region_id = {entity.RegionId}).");
         }
 
-        public List<Gender> GetAll()
+        public List<City> GetAll()
         {
-            var list = new List<Gender>();
+            var list = new List<City>();
             var connection = _conexion.ObtenerConexion();
             const string sql = @"
-                SELECT gender_id, description
-                  FROM gender
-                 ORDER BY gender_id;
+                SELECT id, name, region_id
+                  FROM city
+                 ORDER BY id;
             ";
 
             using var cmd = new NpgsqlCommand(sql, connection)
@@ -55,44 +56,47 @@ namespace CampusLove.Infrastructure.Repositories
             using var rdr = cmd.ExecuteReader();
             while (rdr.Read())
             {
-                list.Add(new Gender
+                list.Add(new City
                 {
-                    GenderId    = rdr.GetInt32(0),
-                    Description = rdr.IsDBNull(1) ? null : rdr.GetString(1)
+                    Id        = rdr.GetInt32(0),
+                    Name      = rdr.IsDBNull(1) ? null : rdr.GetString(1),
+                    RegionId  = rdr.GetInt32(2)
                 });
             }
 
             return list;
         }
 
-        public void Update(Gender entity)
+        public void Update(City entity)
         {
             var connection = _conexion.ObtenerConexion();
             const string sql = @"
-                UPDATE gender
-                   SET description = @description
-                 WHERE gender_id = @id;
+                UPDATE city
+                   SET name      = @name,
+                       region_id = @regionId
+                 WHERE id = @id;
             ";
 
             using var cmd = new NpgsqlCommand(sql, connection)
             {
                 CommandType = CommandType.Text
             };
-            cmd.Parameters.AddWithValue("description", entity.Description ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("id",          entity.GenderId);
+            cmd.Parameters.AddWithValue("name",      entity.Name  ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("regionId",  entity.RegionId);
+            cmd.Parameters.AddWithValue("id",        entity.Id);
 
             var rows = cmd.ExecuteNonQuery();
             if (rows == 0)
                 throw new InvalidOperationException(
-                    $"No se encontró gender con id = {entity.GenderId} para actualizar.");
+                    $"No se encontró city con id = {entity.Id} para actualizar.");
         }
 
         public void Delete(int id)
         {
             var connection = _conexion.ObtenerConexion();
             const string sql = @"
-                DELETE FROM gender
-                 WHERE gender_id = @id;
+                DELETE FROM city
+                 WHERE id = @id;
             ";
 
             using var cmd = new NpgsqlCommand(sql, connection)
@@ -104,7 +108,7 @@ namespace CampusLove.Infrastructure.Repositories
             var rows = cmd.ExecuteNonQuery();
             if (rows == 0)
                 throw new InvalidOperationException(
-                    $"No se encontró gender con id = {id} para eliminar.");
+                    $"No se encontró city con id = {id} para eliminar.");
         }
     }
 }

@@ -34,4 +34,12 @@ public class ConexDBFactory : IDbfactory
     {
         return new ImpUserTypeRepository(_connectionString);
     }
+    public ICityRepository CreateCityRepository()
+    {
+        return new ImpCityRepository(_connectionString);
+    }
+    public ISexualOrientationRepository CreateSexualOrientationRepository()
+    {
+        return new ImpSexualOrientationRepository(_connectionString);
+    }
 }

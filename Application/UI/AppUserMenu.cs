@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using BCrypt.Net;
 using CampusLove.Application.Service;
 using CampusLove.Domain.DTO;
+using CampusLove.Domain.Entities;
 using CampusLove.Domain.Ports;
 using CampusLove.Infrastructure.Repositories;
 using SGCI_app.application.UI;
@@ -18,7 +19,7 @@ namespace CampusLove.Application.UI
         public AppUserMenu() : base(showIntro: false)
         {
             // Cadena de conexión, ajustar según sea necesario
-            string connStr = "Host=localhost;Database=campus_love;Port=5432;Username=postgres;Password=campus2023;Pooling=true";
+            string connStr = "Host=localhost;Database=campus_love;Port=5432;Username=postgres;Password=1219;Pooling=true";
             IAppUserRepository repo = new ImpAppUserRepository(connStr);
             _service = new AppUserService(repo);
         }
@@ -63,16 +64,26 @@ namespace CampusLove.Application.UI
             // Leer contraseña ocultando entrada
             string password = GetValidatedPassword("Password: ");
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
-
+            Console.Clear();
+            var genderMenu = new GenderMenu();
+            genderMenu.ListarGeneros();
             int genderId = GetValidatedIntInput("ID Género: ");
-            int userTypeId = GetValidatedIntInput("ID Tipo de Usuario: ");
+            // Console.Clear();
+            // var userTypeMenu = new UserTypeMenu();
+            // userTypeMenu.ListarTiposUsuario();
+            // int userTypeId = GetValidatedIntInput("ID Tipo de Usuario: ");
 
             string street = GetValidatedInput("Calle: ");
             string buildingNumber = GetValidatedInput("Número de edificio: ");
             string postalCode = GetValidatedInput("Código postal: ");
+            Console.Clear();
+            var cityMenu = new CityMenu();
+            cityMenu.ListarCiudades();
             int cityId = GetValidatedIntInput("ID Ciudad: ");
             string additionalInfo = GetValidatedInput("Info adicional: ", allowEmpty: true);
-
+            Console.Clear();
+            var sexualOrientationMenu = new SexualOrientationMenu();
+            sexualOrientationMenu.ListarOrientaciones();
             int orientationId = GetValidatedIntInput("ID Orientación: ");
             int minAge = GetValidatedIntInput("Edad mínima preferida: ");
             int maxAge = GetValidatedIntInput("Edad máxima preferida: ");
@@ -86,7 +97,6 @@ namespace CampusLove.Application.UI
                 Email = email,
                 PasswordHash = passwordHash,
                 GenderId = genderId,
-                UserTypeId = userTypeId,
                 Address = new DtoAddr
                 {
                     Street = street,

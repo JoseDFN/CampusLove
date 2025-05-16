@@ -17,11 +17,12 @@ namespace CampusLove.ConsoleApp
         public MainMenu() : base(showIntro: true)
         {
             // Connection string - ajusta según tu entorno
-            string connStr = "Host=localhost;Database=campus_love;Port=5432;Username=postgres;Password=campus2023;Pooling=true";
+            string connStr = "Host=localhost;Database=campus_love;Port=5432;Username=postgres;Password=1219;Pooling=true";
 
             _userService = new AppUserService(new ImpAppUserRepository(connStr));
             _careerService = new CareerService(new ImpCareerRepository(connStr));
             _userCareerService = new UserCareerService(new ImpUserCareerRepository(connStr));
+            _careerService = new CareerService(new ImpCareerRepository(connStr));
         }
 
         public override void ShowMenu()
@@ -59,11 +60,8 @@ namespace CampusLove.ConsoleApp
             do
             {
                 ShowHeader("AGREGAR CARRERA");
-                var careers = _careerService.ObtenerTodos();
-                foreach (var c in careers)
-                {
-                    Console.WriteLine($"{c.CareerId}. {c.Name}");
-                }
+                var careers = new CareerMenu();
+                careers.ListarCarreras();
                 DrawSeparator();
 
                 int careerId = GetValidatedIntInput("Seleccione el ID de la carrera: ", 1);

@@ -9,20 +9,20 @@ using SGCI_app.domain.Ports;
 
 namespace CampusLove.Infrastructure.Repositories
 {
-    public class ImpGenderRepository : IGenericRepository<Gender>, IGenderRepository
+    public class ImpSexualOrientationRepository : IGenericRepository<SexualOrientation>, ISexualOrientationRepository
     {
         private readonly ConexionSingleton _conexion;
 
-        public ImpGenderRepository(string connectionString)
+        public ImpSexualOrientationRepository(string connectionString)
         {
             _conexion = ConexionSingleton.Instancia(connectionString);
         }
 
-        public void Create(Gender entity)
+        public void Create(SexualOrientation entity)
         {
             var connection = _conexion.ObtenerConexion();
             const string sql = @"
-                INSERT INTO gender (description)
+                INSERT INTO sexual_orientation (description)
                 VALUES (@description);
             ";
 
@@ -35,17 +35,17 @@ namespace CampusLove.Infrastructure.Repositories
             var rows = cmd.ExecuteNonQuery();
             if (rows == 0)
                 throw new InvalidOperationException(
-                    $"No se pudo insertar gender (description = '{entity.Description}').");
+                    $"No se pudo insertar sexual_orientation (description = '{entity.Description}').");
         }
 
-        public List<Gender> GetAll()
+        public List<SexualOrientation> GetAll()
         {
-            var list = new List<Gender>();
+            var list = new List<SexualOrientation>();
             var connection = _conexion.ObtenerConexion();
             const string sql = @"
-                SELECT gender_id, description
-                  FROM gender
-                 ORDER BY gender_id;
+                SELECT orientation_id, description
+                  FROM sexual_orientation
+                 ORDER BY orientation_id;
             ";
 
             using var cmd = new NpgsqlCommand(sql, connection)
@@ -55,23 +55,23 @@ namespace CampusLove.Infrastructure.Repositories
             using var rdr = cmd.ExecuteReader();
             while (rdr.Read())
             {
-                list.Add(new Gender
+                list.Add(new SexualOrientation
                 {
-                    GenderId    = rdr.GetInt32(0),
-                    Description = rdr.IsDBNull(1) ? null : rdr.GetString(1)
+                    OrientationId = rdr.GetInt32(0),
+                    Description   = rdr.IsDBNull(1) ? null : rdr.GetString(1)
                 });
             }
 
             return list;
         }
 
-        public void Update(Gender entity)
+        public void Update(SexualOrientation entity)
         {
             var connection = _conexion.ObtenerConexion();
             const string sql = @"
-                UPDATE gender
+                UPDATE sexual_orientation
                    SET description = @description
-                 WHERE gender_id = @id;
+                 WHERE orientation_id = @id;
             ";
 
             using var cmd = new NpgsqlCommand(sql, connection)
@@ -79,20 +79,20 @@ namespace CampusLove.Infrastructure.Repositories
                 CommandType = CommandType.Text
             };
             cmd.Parameters.AddWithValue("description", entity.Description ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("id",          entity.GenderId);
+            cmd.Parameters.AddWithValue("id",          entity.OrientationId);
 
             var rows = cmd.ExecuteNonQuery();
             if (rows == 0)
                 throw new InvalidOperationException(
-                    $"No se encontró gender con id = {entity.GenderId} para actualizar.");
+                    $"No se encontró sexual_orientation con id = {entity.OrientationId} para actualizar.");
         }
 
         public void Delete(int id)
         {
             var connection = _conexion.ObtenerConexion();
             const string sql = @"
-                DELETE FROM gender
-                 WHERE gender_id = @id;
+                DELETE FROM sexual_orientation
+                 WHERE orientation_id = @id;
             ";
 
             using var cmd = new NpgsqlCommand(sql, connection)
@@ -104,7 +104,7 @@ namespace CampusLove.Infrastructure.Repositories
             var rows = cmd.ExecuteNonQuery();
             if (rows == 0)
                 throw new InvalidOperationException(
-                    $"No se encontró gender con id = {id} para eliminar.");
+                    $"No se encontró sexual_orientation con id = {id} para eliminar.");
         }
     }
 }
