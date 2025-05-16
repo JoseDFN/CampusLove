@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CampusLove.Domain.Entities;
+using CampusLove.Domain.Ports;
 using SGCI_app.domain.Ports;
 
 namespace CampusLove.Application.Service
 {
     public class UserTypeService
     {
-        private readonly IGenericRepository<UserType> _repo;
+        private readonly IUserTypeRepository _repo;
 
-        public UserTypeService(IGenericRepository<UserType> repo)
+        public UserTypeService(IUserTypeRepository repo)
         {
-            _repo = repo ?? throw new ArgumentNullException(nameof(repo));
+            _repo = repo;
         }
         public void CrearTipoUsuario(UserType usertype)
         {

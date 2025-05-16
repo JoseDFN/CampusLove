@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CampusLove.Domain.Entities;
+using CampusLove.Domain.Ports;
 using SGCI_app.domain.Ports;
 
 namespace CampusLove.Application.Service
 {
     public class CareerService
     {
-        private readonly IGenericRepository<Career> _repo;
+        private readonly ICareerRepository _repo;
 
-        public CareerService(IGenericRepository<Career> repo)
+        public CareerService(ICareerRepository repo)
         {
-            _repo = repo ?? throw new ArgumentNullException(nameof(repo));
+            _repo = repo;
         }
 
         public void CrearCareer(Career career)

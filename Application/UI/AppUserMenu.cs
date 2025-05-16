@@ -77,6 +77,8 @@ namespace CampusLove.Application.UI
             string buildingNumber = GetValidatedInput("Número de edificio: ");
             string postalCode = GetValidatedInput("Código postal: ");
             Console.Clear();
+            var cityMenu = new CityMenu();
+            cityMenu.ListarCiudades();
             int cityId = GetValidatedIntInput("ID Ciudad: ");
             string additionalInfo = GetValidatedInput("Info adicional: ", allowEmpty: true);
             Console.Clear();
