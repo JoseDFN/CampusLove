@@ -9,6 +9,7 @@ namespace CampusLove.Domain.Ports
 {
     public interface IUserInterestRepository : IGenericRepository<UserInterest>
     {
-        
+        public void Delete(int userId, int interestId);
+        public void Update (int userId, int oldInterestId, int newInterestId);
     }
 }
