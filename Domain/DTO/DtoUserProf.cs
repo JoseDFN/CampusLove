@@ -15,5 +15,6 @@ namespace CampusLove.Domain.DTO
         public string? Status { get; set; }
         public DateTime UpdatedAt { get; set; }
         public DtoPref Preference { get; set; } = new DtoPref();
+        public int CommonInterestCount { get; set; }
     }
 }

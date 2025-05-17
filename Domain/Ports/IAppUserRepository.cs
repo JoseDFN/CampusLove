@@ -8,6 +8,6 @@ namespace CampusLove.Domain.Ports
         void update(int id, DtoAppUser entity);
         int create(DtoAppUser entity);
         DtoAppUser ObtenerUsuarioPorEmail(string email);
-
+        List<DtoAppUser> GetFeedCandidates(int currentUserId);
     }
 }
