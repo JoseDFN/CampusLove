@@ -9,6 +9,10 @@ namespace CampusLove.Domain.Ports
 {
     public interface IRegionRepository : IGenericRepository<Region>
     {
-        
+        void CrearRegion(Region region);
+        void ActualizarRegion(Region region);
+        void EliminarRegion(int id);
+        Region ObtenerRegion(int id);
+        IEnumerable<Region> ObtenerTodos();
     }
 }

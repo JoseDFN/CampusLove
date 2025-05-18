@@ -131,9 +131,44 @@ public class LoginUI : BaseMenu
 
     private void ActualizarPerfilUsuario(DtoAppUser user)
     {
+        while (true)
+        {
+            Console.Clear();
+            ShowHeader("ACTUALIZAR PERFIL");
+            Console.WriteLine("1. Datos Personales");
+            Console.WriteLine("2. Carreras");
+            Console.WriteLine("3. Intereses");
+            Console.WriteLine("4. Salir");
+            Console.Write("\nSeleccione una opción: ");
+
+            string opcion = Console.ReadLine()!;
+
+            switch (opcion)
+            {
+                case "1":
+                    ActualizarDatosPersonales(user);
+                    break;
+                case "2":
+                    ActualizarCarreras(user);
+                    break;
+                case "3":
+                    ActualizarIntereses(user);
+                    break;
+                case "4":
+                    return;
+                default:
+                    Console.WriteLine("Opción no válida. Presione cualquier tecla para continuar...");
+                    Console.ReadKey();
+                    break;
+            }
+        }
+    }
+
+    private void ActualizarDatosPersonales(DtoAppUser user)
+    {
         try
         {
-            ShowHeader("ACTUALIZAR PERFIL");
+            ShowHeader("ACTUALIZAR DATOS PERSONALES");
 
             string name = GetValidatedInput("Nombre: ");
             
@@ -223,9 +258,18 @@ public class LoginUI : BaseMenu
             };
 
             _service.ActualizarUsuario(user.UserId, dto);
-            ShowSuccessMessage("Perfil actualizado exitosamente.");
+            ShowSuccessMessage("Datos personales actualizados exitosamente.");
+        }
+        catch (Exception ex)
+        {
+            ShowErrorMessage($"Error al actualizar datos personales: {ex.Message}");
+        }
+    }
 
-            // Actualización de carreras
+    private void ActualizarCarreras(DtoAppUser user)
+    {
+        try
+        {
             Console.Clear();
             ShowHeader("ACTUALIZAR CARRERAS");
             Console.WriteLine("¿Desea actualizar sus carreras? (Y/N)");
@@ -276,7 +320,18 @@ public class LoginUI : BaseMenu
                 } while (addMore);
             }
 
-            // Actualización de intereses
+            ShowSuccessMessage("Carreras actualizadas exitosamente.");
+        }
+        catch (Exception ex)
+        {
+            ShowErrorMessage($"Error al actualizar carreras: {ex.Message}");
+        }
+    }
+
+    private void ActualizarIntereses(DtoAppUser user)
+    {
+        try
+        {
             Console.Clear();
             ShowHeader("ACTUALIZAR INTERESES");
             Console.WriteLine("¿Desea actualizar sus intereses? (Y/N)");
@@ -328,15 +383,11 @@ public class LoginUI : BaseMenu
                 } while (addMoreInterests);
             }
 
-            ShowSuccessMessage("Perfil actualizado exitosamente.");
-            Console.WriteLine("\nPresione cualquier tecla para continuar...");
-            Console.ReadKey();
+            ShowSuccessMessage("Intereses actualizados exitosamente.");
         }
         catch (Exception ex)
         {
-            ShowErrorMessage($"Error al actualizar perfil: {ex.Message}");
-            Console.WriteLine("\nPresione cualquier tecla para continuar...");
-            Console.ReadKey();
+            ShowErrorMessage($"Error al actualizar intereses: {ex.Message}");
         }
     }
 
@@ -348,30 +399,49 @@ public class LoginUI : BaseMenu
             {
                 Console.Clear();
                 Console.WriteLine($"--- MENÚ ADMINISTRADOR: {user.Name} ---");
-                Console.WriteLine("1. Gestión de usuarios");
-                Console.WriteLine("2. Reportes");
-                Console.WriteLine("3. Cerrar sesión");
+                Console.WriteLine("1. Carreras");
+                Console.WriteLine("2. Intereses");
+                Console.WriteLine("3. Géneros");
+                Console.WriteLine("4. Orientaciones Sexuales");
+                Console.WriteLine("5. Países");
+                Console.WriteLine("6. Regiones");
+                Console.WriteLine("7. Ciudades");
+                Console.WriteLine("8. Volver al menú anterior");
                 Console.Write("\nSeleccione una opción: ");
-                
+
                 string opcion = Console.ReadLine()!;
-                Console.WriteLine($"Opción seleccionada: {opcion}");
-                
+
                 switch (opcion)
                 {
                     case "1":
-                        Console.WriteLine("Abriendo menú de gestión de usuarios...");
-                        var userMenu = new AppUserMenu();
-                        userMenu.ShowMenu();
+                        var careerMenu = new CareerMenu();
+                        careerMenu.ShowMenu();
                         break;
                     case "2":
-                        Console.WriteLine("Función de reportes en desarrollo...");
-                        Console.WriteLine("\nPresione cualquier tecla para continuar...");
-                        Console.ReadKey();
+                        var interestMenu = new InterestMenu();
+                        interestMenu.ShowMenu();
                         break;
                     case "3":
-                        Console.WriteLine("Cerrando sesión...");
-                        Console.WriteLine("\nPresione cualquier tecla para continuar...");
-                        Console.ReadKey();
+                        var genderMenu = new GenderMenu();
+                        genderMenu.ShowMenu();
+                        break;
+                    case "4":
+                        var orientationMenu = new SexualOrientationMenu();
+                        orientationMenu.ShowMenu();
+                        break;
+                    case "5":
+                        var countryMenu = new CountryMenu();
+                        countryMenu.ShowMenu();
+                        break;
+                    case "6":
+                        var regionMenu = new RegionMenu();
+                        regionMenu.ShowMenu();
+                        break;
+                    case "7":
+                        var cityMenu = new CityMenu();
+                        cityMenu.ShowMenu();
+                        break;
+                    case "8":
                         return;
                     default:
                         Console.WriteLine("Opción no válida. Presione cualquier tecla para continuar...");
