@@ -55,70 +55,122 @@ namespace CampusLove.Application.UI
 
         public int CrearUsuario()
         {
-            ShowHeader("CREAR NUEVO USUARIO");
-
-            string name = GetValidatedInput("Nombre: ");
-            int age = GetValidatedIntInput("Edad: ", 0);
-            string email = GetValidatedInput("Email: ");
-
-            // Leer contraseña ocultando entrada
-            string password = GetValidatedPassword("Password: ");
-            string passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
-            Console.Clear();
-            var genderMenu = new GenderMenu();
-            genderMenu.ListarGeneros();
-            int genderId = GetValidatedIntInput("ID Género: ");
-            // Console.Clear();
-            // var userTypeMenu = new UserTypeMenu();
-            // userTypeMenu.ListarTiposUsuario();
-            // int userTypeId = GetValidatedIntInput("ID Tipo de Usuario: ");
-
-            string street = GetValidatedInput("Calle: ");
-            string buildingNumber = GetValidatedInput("Número de edificio: ");
-            string postalCode = GetValidatedInput("Código postal: ");
-            Console.Clear();
-            var cityMenu = new CityMenu();
-            cityMenu.ListarCiudades();
-            int cityId = GetValidatedIntInput("ID Ciudad: ");
-            string additionalInfo = GetValidatedInput("Info adicional: ", allowEmpty: true);
-            Console.Clear();
-            var sexualOrientationMenu = new SexualOrientationMenu();
-            sexualOrientationMenu.ListarOrientaciones();
-            int orientationId = GetValidatedIntInput("ID Orientación: ");
-            int minAge = GetValidatedIntInput("Edad mínima preferida: ");
-            int maxAge = GetValidatedIntInput("Edad máxima preferida: ");
-
-            string profileText = GetValidatedInput("Texto de perfil: ", allowEmpty: true);
-
-            var dto = new DtoAppUser
-            {
-                Name = name,
-                Age = age,
-                Email = email,
-                PasswordHash = passwordHash,
-                GenderId = genderId,
-                Address = new DtoAddr
-                {
-                    Street = street,
-                    BuildingNumber = buildingNumber,
-                    PostalCode = postalCode,
-                    CityId = cityId,
-                    AdditionalInfo = additionalInfo
-                },
-                UserProfile = new DtoUserProf
-                {
-                    Preference = new DtoPref
-                    {
-                        OrientationId = orientationId,
-                        MinAge = minAge,
-                        MaxAge = maxAge
-                    },
-                    ProfileText = profileText
-                }
-            };
-
             try
             {
+                ShowHeader("CREAR NUEVO USUARIO");
+
+                string name = GetValidatedInput("Nombre: ");
+                
+                // Validación de edad del usuario
+                int age;
+                do
+                {
+                    age = GetValidatedIntInput("Edad: ", 0);
+                    if (age < 18)
+                    {
+                        ShowErrorMessage("Lo sentimos, este programa no es apto para menores de edad.");
+                        Console.Clear();
+                        return -1;
+                    }
+                } while (age < 18);
+
+                // Validación de email único
+                string email;
+                bool emailExists;
+                do
+                {
+                    email = GetValidatedInput("Email: ");
+                    try
+                    {
+                        var existingUser = _service.ObtenerUsuarioPorEmail(email);
+                        emailExists = existingUser != null;
+                        if (emailExists)
+                        {
+                            ShowErrorMessage("Este email ya está registrado. Por favor, ingrese otro email.");
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        emailExists = false;
+                    }
+                } while (emailExists);
+
+                // Leer contraseña ocultando entrada
+                string password = GetValidatedPassword("Password: ");
+                string passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
+                Console.Clear();
+                var genderMenu = new GenderMenu();
+                genderMenu.ListarGeneros();
+                int genderId = GetValidatedIntInput("ID Género: ");
+                // Console.Clear();
+                // var userTypeMenu = new UserTypeMenu();
+                // userTypeMenu.ListarTiposUsuario();
+                // int userTypeId = GetValidatedIntInput("ID Tipo de Usuario: ");
+
+                string street = GetValidatedInput("Calle: ");
+                string buildingNumber = GetValidatedInput("Número de edificio: ");
+                string postalCode = GetValidatedInput("Código postal: ");
+                Console.Clear();
+                var cityMenu = new CityMenu();
+                cityMenu.ListarCiudades();
+                int cityId = GetValidatedIntInput("ID Ciudad: ");
+                string additionalInfo = GetValidatedInput("Info adicional: ", allowEmpty: true);
+                Console.Clear();
+                var sexualOrientationMenu = new SexualOrientationMenu();
+                sexualOrientationMenu.ListarOrientaciones();
+                int orientationId = GetValidatedIntInput("ID Orientación: ");
+
+                // Validación de edad mínima preferida
+                int minAge;
+                do
+                {
+                    minAge = GetValidatedIntInput("Edad mínima preferida: ", 0);
+                    if (minAge < 18)
+                    {
+                        ShowErrorMessage("La edad mínima debe ser 18 años o más, ya que el programa no es apto para menores de edad.");
+                    }
+                } while (minAge < 18);
+
+                // Validación de edad máxima preferida
+                int maxAge;
+                do
+                {
+                    maxAge = GetValidatedIntInput("Edad máxima preferida: ", 0);
+                    if (maxAge < minAge)
+                    {
+                        ShowErrorMessage($"La edad máxima debe ser mayor o igual a la edad mínima ({minAge} años).");
+                    }
+                } while (maxAge < minAge);
+
+                string profileText = GetValidatedInput("Texto de perfil: ", allowEmpty: true);
+
+                var dto = new DtoAppUser
+                {
+                    Name = name,
+                    Age = age,
+                    Email = email,
+                    PasswordHash = passwordHash,
+                    GenderId = genderId,
+                    Address = new DtoAddr
+                    {
+                        Street = street,
+                        BuildingNumber = buildingNumber,
+                        PostalCode = postalCode,
+                        CityId = cityId,
+                        AdditionalInfo = additionalInfo
+                    },
+                    UserProfile = new DtoUserProf
+                    {
+                        Preference = new DtoPref
+                        {
+                            OrientationId = orientationId,
+                            MinAge = minAge,
+                            MaxAge = maxAge
+                        },
+                        ProfileText = profileText
+                    }
+                };
+
                 int idUsuario = _service.CrearUsuario(dto);
                 ShowSuccessMessage("Usuario creado exitosamente.");
                 return idUsuario;

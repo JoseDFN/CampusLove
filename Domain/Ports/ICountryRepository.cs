@@ -9,6 +9,10 @@ namespace CampusLove.Domain.Ports
 {
     public interface ICountryRepository : IGenericRepository<Country>
     {
-        
+        void CrearCountry(Country country);
+        void ActualizarCountry(Country country);
+        void EliminarCountry(int id);
+        Country ObtenerCountry(int id);
+        IEnumerable<Country> ObtenerTodos();
     }
 }

@@ -1,53 +1,51 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using CampusLove.Domain.Entities;
-using CampusLove.Domain.Ports;
 using SGCI_app.domain.Ports;
+using CampusLove.Domain.Ports;
 
 namespace CampusLove.Application.Service
 {
-    public class CareerService
+    public class InterestService
     {
-        private readonly ICareerRepository _repo;
+        private readonly IInterestRepository _repo;
 
-        public CareerService(ICareerRepository repo)
+        public InterestService(IInterestRepository repo)
         {
             _repo = repo;
         }
 
-        public void CrearCareer(Career career)
+        public void CrearInterest(Interest interest)
         {
-            if (career == null)
-                throw new ArgumentNullException(nameof(career));
-            if (string.IsNullOrWhiteSpace(career.Name))
-                throw new ArgumentException("El nombre de la carrera no puede estar vacío.", nameof(career.Name));
+            if (interest == null)
+                throw new ArgumentNullException(nameof(interest));
+            if (string.IsNullOrWhiteSpace(interest.Description))
+                throw new ArgumentException("La descripción del interés no puede estar vacía.", nameof(interest.Description));
 
-            _repo.Create(career);
+            _repo.Create(interest);
         }
 
-        public void EliminarCareer(int careerId)
+        public void EliminarInterest(int interestId)
         {
-            if (careerId <= 0)
-                throw new ArgumentException("El ID de carrera debe ser mayor que cero.", nameof(careerId));
+            if (interestId <= 0)
+                throw new ArgumentException("El ID de interés debe ser mayor que cero.", nameof(interestId));
 
-            _repo.Delete(careerId);
+            _repo.Delete(interestId);
         }
 
-        public void ActualizarCareer(Career career)
+        public void ActualizarInterest(Interest interest)
         {
-            if (career == null)
-                throw new ArgumentNullException(nameof(career));
-            if (career.CareerId <= 0)
-                throw new ArgumentException("El ID de carrera debe ser mayor que cero.", nameof(career.CareerId));
-            if (string.IsNullOrWhiteSpace(career.Name))
-                throw new ArgumentException("El nombre de la carrera no puede estar vacío.", nameof(career.Name));
+            if (interest == null)
+                throw new ArgumentNullException(nameof(interest));
+            if (interest.InterestId <= 0)
+                throw new ArgumentException("El ID de interés debe ser mayor que cero.", nameof(interest.InterestId));
+            if (string.IsNullOrWhiteSpace(interest.Description))
+                throw new ArgumentException("La descripción del interés no puede estar vacía.", nameof(interest.Description));
 
-            _repo.Update(career);
+            _repo.Update(interest);
         }
 
-        public List<Career> ObtenerTodos()
+        public List<Interest> ObtenerTodos()
         {
             return _repo.GetAll();
         }
@@ -62,7 +60,7 @@ namespace CampusLove.Application.Service
             while (true)
             {
                 Console.Clear();
-                Console.WriteLine($"LISTADO DE CARRERAS (Página {currentPage}/{totalPages})");
+                Console.WriteLine($"LISTADO DE INTERESES (Página {currentPage}/{totalPages})");
                 Console.WriteLine(new string('-', 60));
 
                 // Toma el bloque de 20 elementos de la página actual
@@ -78,10 +76,10 @@ namespace CampusLove.Application.Service
                     int rightIndex = i + 10;
 
                     string leftText = leftIndex < pageItems.Count
-                        ? $"[{pageItems[leftIndex].CareerId,3}] {pageItems[leftIndex].Name,-20}"
+                        ? $"[{pageItems[leftIndex].InterestId,3}] {pageItems[leftIndex].Description,-20}"
                         : "";
                     string rightText = rightIndex < pageItems.Count
-                        ? $"[{pageItems[rightIndex].CareerId,3}] {pageItems[rightIndex].Name,-20}"
+                        ? $"[{pageItems[rightIndex].InterestId,3}] {pageItems[rightIndex].Description,-20}"
                         : "";
 
                     Console.WriteLine($"{leftText}    {rightText}");

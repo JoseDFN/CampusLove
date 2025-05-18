@@ -42,4 +42,12 @@ public class ConexDBFactory : IDbfactory
     {
         return new ImpSexualOrientationRepository(_connectionString);
     }
+    public IInterestRepository CreateInterestRepository()
+    {
+        return new ImpInterestsRepository(_connectionString);
+    }
+    public IUserInterestRepository CreateUserInterestRepository()
+    {
+        return new ImpUserInterestsRepository(_connectionString);
+    }
 }
