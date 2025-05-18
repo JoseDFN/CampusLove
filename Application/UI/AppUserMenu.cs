@@ -58,7 +58,20 @@ namespace CampusLove.Application.UI
             ShowHeader("CREAR NUEVO USUARIO");
 
             string name = GetValidatedInput("Nombre: ");
-            int age = GetValidatedIntInput("Edad: ", 0);
+            
+            // Validación de edad del usuario
+            int age;
+            do
+            {
+                age = GetValidatedIntInput("Edad: ", 0);
+                if (age < 18)
+                {
+                    ShowErrorMessage("Lo sentimos, este programa no es apto para menores de edad.");
+                    Console.Clear();
+                    throw new InvalidOperationException("MENOR_DE_EDAD");
+                }
+            } while (age < 18);
+
             string email = GetValidatedInput("Email: ");
 
             // Leer contraseña ocultando entrada
@@ -85,8 +98,28 @@ namespace CampusLove.Application.UI
             var sexualOrientationMenu = new SexualOrientationMenu();
             sexualOrientationMenu.ListarOrientaciones();
             int orientationId = GetValidatedIntInput("ID Orientación: ");
-            int minAge = GetValidatedIntInput("Edad mínima preferida: ");
-            int maxAge = GetValidatedIntInput("Edad máxima preferida: ");
+
+            // Validación de edad mínima preferida
+            int minAge;
+            do
+            {
+                minAge = GetValidatedIntInput("Edad mínima preferida: ", 0);
+                if (minAge < 18)
+                {
+                    ShowErrorMessage("La edad mínima debe ser 18 años o más, ya que el programa no es apto para menores de edad.");
+                }
+            } while (minAge < 18);
+
+            // Validación de edad máxima preferida
+            int maxAge;
+            do
+            {
+                maxAge = GetValidatedIntInput("Edad máxima preferida: ", 0);
+                if (maxAge < minAge)
+                {
+                    ShowErrorMessage($"La edad máxima debe ser mayor o igual a la edad mínima ({minAge} años).");
+                }
+            } while (maxAge < minAge);
 
             string profileText = GetValidatedInput("Texto de perfil: ", allowEmpty: true);
 

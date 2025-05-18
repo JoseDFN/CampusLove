@@ -108,19 +108,7 @@ namespace CampusLove.Application.UI
             ShowHeader("LISTADO DE INTERESES");
             try
             {
-                var list = _service.ObtenerTodos();
-                if (list.Count == 0)
-                {
-                    Console.WriteLine("No hay intereses registrados.");
-                }
-                else
-                {
-                    Console.WriteLine("ID\tDescripción");
-                    foreach (var i in list)
-                    {
-                        Console.WriteLine($"{i.InterestId}\t{i.Description}");
-                    }
-                }
+                _service.MostrarTodos();
             }
             catch (Exception ex)
             {

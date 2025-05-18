@@ -108,19 +108,7 @@ namespace CampusLove.Application.UI
             ShowHeader("LISTADO DE CARRERAS");
             try
             {
-                var list = _service.ObtenerTodos();
-                if (list.Count == 0)
-                {
-                    Console.WriteLine("No hay carreras registradas.");
-                }
-                else
-                {
-                    Console.WriteLine("ID\tNombre");
-                    foreach (var c in list)
-                    {
-                        Console.WriteLine($"{c.CareerId}\t{c.Name}");
-                    }
-                }
+                _service.MostrarTodos();
             }
             catch (Exception ex)
             {

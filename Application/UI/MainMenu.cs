@@ -55,80 +55,94 @@ namespace CampusLove.ConsoleApp
 
         private void SignUpWithCareerFlow()
         {
-            // Crear usuario y obtener su ID
-            var userMenu = new AppUserMenu();
-            int userId = userMenu.CrearUsuario();
-
-            bool addMore;
-            do
+            try
             {
-                ShowHeader("AGREGAR CARRERA");
-                var careers = new CareerMenu();
-                careers.ListarCarreras();
-                DrawSeparator();
+                // Crear usuario y obtener su ID
+                var userMenu = new AppUserMenu();
+                int userId = userMenu.CrearUsuario();
 
-                int careerId = GetValidatedIntInput("Seleccione el ID de la carrera: ", 1);
-                try
-                {
-                    _userCareerService.CrearUserCareer(new UserCareer { UserId = userId, CareerId = careerId });
-                    ShowSuccessMessage("Carrera agregada correctamente.");
-                }
-                catch (Exception ex)
-                {
-                    ShowErrorMessage($"Error al agregar carrera: {ex.Message}");
-                }
-
-                // Preguntar si desea agregar otra
-                string resp;
-                bool validResponse;
+                bool addMore;
                 do
                 {
-                    resp = GetValidatedInput("¿Desea agregar otra carrera? (Y/N): ");
-                    validResponse = resp.Equals("Y", StringComparison.OrdinalIgnoreCase) || resp.Equals("N", StringComparison.OrdinalIgnoreCase);
-                    if (!validResponse)
-                        ShowErrorMessage("Respuesta inválida. Por favor ingrese 'Y' o 'N'.");
-                } while (!validResponse);
+                    ShowHeader("AGREGAR CARRERA");
+                    var careers = new CareerMenu();
+                    careers.ListarCarreras();
+                    DrawSeparator();
 
-                addMore = resp.Equals("Y", StringComparison.OrdinalIgnoreCase);
-            } while (addMore);
+                    int careerId = GetValidatedIntInput("Seleccione el ID de la carrera: ", 1);
+                    try
+                    {
+                        _userCareerService.CrearUserCareer(new UserCareer { UserId = userId, CareerId = careerId });
+                        ShowSuccessMessage("Carrera agregada correctamente.");
+                    }
+                    catch (Exception ex)
+                    {
+                        ShowErrorMessage($"Error al agregar carrera: {ex.Message}");
+                    }
 
-            // --- AGREGAR INTERESES ---
-            bool addMoreInterests;
-            do
-            {
-                ShowHeader("AGREGAR INTERÉS");
-                var interestsMenu = new InterestMenu();
-                interestsMenu.ListarIntereses();
-                DrawSeparator();
+                    // Preguntar si desea agregar otra
+                    string resp;
+                    bool validResponse;
+                    do
+                    {
+                        resp = GetValidatedInput("¿Desea agregar otra carrera? (Y/N): ");
+                        validResponse = resp.Equals("Y", StringComparison.OrdinalIgnoreCase) || resp.Equals("N", StringComparison.OrdinalIgnoreCase);
+                        if (!validResponse)
+                            ShowErrorMessage("Respuesta inválida. Por favor ingrese 'Y' o 'N'.");
+                    } while (!validResponse);
 
-                int interestId = GetValidatedIntInput("Seleccione el ID del interés: ", 1);
-                try
-                {
-                    _userInterestService.CrearUserInterest(new UserInterest { UserId = userId, InterestId = interestId });
-                    ShowSuccessMessage("Interés agregado correctamente.");
-                }
-                catch (Exception ex)
-                {
-                    ShowErrorMessage($"Error al agregar interés: {ex.Message}");
-                }
+                    addMore = resp.Equals("Y", StringComparison.OrdinalIgnoreCase);
+                } while (addMore);
 
-                // Validar respuesta Y/N
-                string resp2;
-                bool valid2;
+                // --- AGREGAR INTERESES ---
+                bool addMoreInterests;
                 do
                 {
-                    resp2 = GetValidatedInput("¿Desea agregar otro interés? (Y/N): ");
-                    valid2 = resp2.Equals("Y", StringComparison.OrdinalIgnoreCase)
-                          || resp2.Equals("N", StringComparison.OrdinalIgnoreCase);
-                    if (!valid2)
-                        ShowErrorMessage("Respuesta inválida. Ingrese 'Y' o 'N'.");
-                } while (!valid2);
+                    ShowHeader("AGREGAR INTERÉS");
+                    var interestsMenu = new InterestMenu();
+                    interestsMenu.ListarIntereses();
+                    DrawSeparator();
 
-                addMoreInterests = resp2.Equals("Y", StringComparison.OrdinalIgnoreCase);
+                    int interestId = GetValidatedIntInput("Seleccione el ID del interés: ", 1);
+                    try
+                    {
+                        _userInterestService.CrearUserInterest(new UserInterest { UserId = userId, InterestId = interestId });
+                        ShowSuccessMessage("Interés agregado correctamente.");
+                    }
+                    catch (Exception ex)
+                    {
+                        ShowErrorMessage($"Error al agregar interés: {ex.Message}");
+                    }
 
-            } while (addMoreInterests);
+                    // Validar respuesta Y/N
+                    string resp2;
+                    bool valid2;
+                    do
+                    {
+                        resp2 = GetValidatedInput("¿Desea agregar otro interés? (Y/N): ");
+                        valid2 = resp2.Equals("Y", StringComparison.OrdinalIgnoreCase)
+                              || resp2.Equals("N", StringComparison.OrdinalIgnoreCase);
+                        if (!valid2)
+                            ShowErrorMessage("Respuesta inválida. Ingrese 'Y' o 'N'.");
+                    } while (!valid2);
 
-            ShowSuccessMessage("Proceso de Sign Up completado.");
+                    addMoreInterests = resp2.Equals("Y", StringComparison.OrdinalIgnoreCase);
+
+                } while (addMoreInterests);
+
+                ShowSuccessMessage("Proceso de Sign Up completado.");
+            }
+            catch (InvalidOperationException ex) when (ex.Message == "MENOR_DE_EDAD")
+            {
+                // La excepción ya fue manejada en AppUserMenu, solo retornamos al menú principal
+                return;
+            }
+            catch (Exception ex)
+            {
+                ShowErrorMessage($"Error en el proceso de registro: {ex.Message}");
+                Console.WriteLine("\nPresione cualquier tecla para continuar...");
+                Console.ReadKey();
+            }
         }
     }
 }

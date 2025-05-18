@@ -11,11 +11,11 @@ using CampusLove.Infrastructure.Repositories;
 using SGCI_app.application.UI;
 using CampusLove.Application.UI;
 
-public class LoginUI
+public class LoginUI : BaseMenu
 {
     private readonly AppUserService _service;
 
-    public LoginUI(AppUserService service)
+    public LoginUI(AppUserService service) : base(showIntro: false)
     {
         _service = service;
     }
@@ -54,8 +54,6 @@ public class LoginUI
             }
 
             ShowSuccessMessage($"Bienvenido, {user.Name}");
-            Console.WriteLine("\nPresione cualquier tecla para continuar al menú...");
-            Console.ReadKey();
 
             // Redirigir al menú según el tipo de usuario
             switch (user.UserTypeId)
@@ -72,7 +70,6 @@ public class LoginUI
 
                 default:
                     ShowErrorMessage($"Tipo de usuario desconocido: {user.UserTypeId}");
-                    Console.WriteLine("\nPresione cualquier tecla para continuar...");
                     Console.ReadKey();
                     break;
             }
@@ -172,64 +169,8 @@ public class LoginUI
             Console.ReadKey();
         }
     }
-
-    // Métodos auxiliares para entradas
-    private string GetValidatedInput(string prompt)
+    public override void ShowMenu()
     {
-        Console.Write(prompt);
-        string input = Console.ReadLine()!;
-        while (string.IsNullOrWhiteSpace(input))
-        {
-            Console.Write("Entrada no válida. " + prompt);
-            input = Console.ReadLine()!;
-        }
-        return input;
-    }
-
-    private string GetValidatedPassword(string prompt)
-    {
-        Console.Write(prompt);
-        string password = string.Empty;
-        ConsoleKeyInfo key;
-
-        do
-        {
-            key = Console.ReadKey(true);
-            if (key.Key != ConsoleKey.Backspace && key.Key != ConsoleKey.Enter)
-            {
-                password += key.KeyChar;
-                Console.Write("*");
-            }
-            else if (key.Key == ConsoleKey.Backspace && password.Length > 0)
-            {
-                password = password[0..^1];
-                Console.Write("\b \b");
-            }
-        } while (key.Key != ConsoleKey.Enter);
-
-        Console.WriteLine();
-        return password;
-    }
-
-    private void ShowHeader(string title)
-    {
-        Console.Clear();
-        Console.WriteLine("===================================");
-        Console.WriteLine($"        {title}");
-        Console.WriteLine("===================================");
-    }
-
-    private void ShowSuccessMessage(string message)
-    {
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine(message);
-        Console.ResetColor();
-    }
-
-    private void ShowErrorMessage(string message)
-    {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine(message);
-        Console.ResetColor();
+        Login();
     }
 }
