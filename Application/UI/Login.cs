@@ -106,9 +106,7 @@ public class LoginUI : BaseMenu
                     feedMenu.ShowMenu();
                     break;
                 case "2":
-                    Console.WriteLine("Función de ver coincidencias en desarrollo...");
-                    Console.WriteLine("\nPresione cualquier tecla para continuar...");
-                    Console.ReadKey();
+                    MostrarCoincidencias(user);
                     break;
                 case "3":
                     MostrarEstadisticas(user);
@@ -124,6 +122,80 @@ public class LoginUI : BaseMenu
                     Console.ReadKey();
                     break;
             }
+        }
+    }
+
+    private void MostrarCoincidencias(DtoAppUser user)
+    {
+        try
+        {
+            Console.Clear();
+            ShowHeader("MIS COINCIDENCIAS");
+
+            // Configurar conexión y servicios
+            string connStr = "Host=localhost;Database=campus_love;Port=5432;Username=postgres;Password=1219;Pooling=true";
+            var matchRepo = new ImpMatchRepository(connStr);
+            var userRepo = new ImpAppUserRepository(connStr);
+            var matchService = new MatchService(matchRepo, userRepo, connStr);
+
+            // Obtener matches del usuario
+            var matches = matchService.GetUserMatches(user.UserId);
+
+            if (matches.Count == 0)
+            {
+                Console.WriteLine("\nNo tienes coincidencias aún. ¡Sigue buscando!");
+                Console.WriteLine("\nPresione cualquier tecla para continuar...");
+                Console.ReadKey();
+                return;
+            }
+
+            // Mostrar matches
+            Console.WriteLine($"\nTienes {matches.Count} coincidencias:");
+            Console.WriteLine(new string('-', 80));
+
+            foreach (var (match, matchedUser) in matches)
+            {
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine($"\n{match.MatchedAt:dd/MM/yyyy HH:mm}");
+                Console.ResetColor();
+
+                Console.WriteLine($"Nombre: {matchedUser.Name}");
+                Console.WriteLine($"Edad: {matchedUser.Age} años");
+                Console.WriteLine($"Intereses en común: {matchedUser.UserProfile.CommonInterestCount}");
+                
+                if (matchedUser.UserProfile.CommonInterestNames.Length > 0)
+                {
+                    Console.WriteLine("\nIntereses compartidos:");
+                    foreach (var interest in matchedUser.UserProfile.CommonInterestNames)
+                    {
+                        Console.WriteLine($"- {interest}");
+                    }
+                }
+                
+                if (!string.IsNullOrEmpty(matchedUser.UserProfile.ProfileText))
+                {
+                    Console.WriteLine($"\nSobre mí:");
+                    Console.WriteLine(matchedUser.UserProfile.ProfileText);
+                }
+
+                if (matchedUser.UserProfile.Verified)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("✓ Perfil verificado");
+                    Console.ResetColor();
+                }
+
+                Console.WriteLine(new string('-', 80));
+            }
+
+            Console.WriteLine("\nPresione cualquier tecla para continuar...");
+            Console.ReadKey();
+        }
+        catch (Exception ex)
+        {
+            ShowErrorMessage($"Error al mostrar coincidencias: {ex.Message}");
+            Console.WriteLine("\nPresione cualquier tecla para continuar...");
+            Console.ReadKey();
         }
     }
 

@@ -203,6 +203,11 @@ namespace CampusLove.Infrastructure.Repositories
                 CALL sp_update_app_user(
                     @user_id, @name, @age, @email, @password_hash, @gender_id
                 );
+                
+                UPDATE user_profile
+                SET profile_text = @profile_text,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE user_id = @user_id;
             ";
             using var cmd = new NpgsqlCommand(sql, conn) { CommandType = CommandType.Text };
             cmd.Parameters.AddWithValue("user_id", id);
@@ -211,6 +216,7 @@ namespace CampusLove.Infrastructure.Repositories
             cmd.Parameters.AddWithValue("email", dto.Email ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("password_hash", dto.PasswordHash ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("gender_id", dto.GenderId);
+            cmd.Parameters.AddWithValue("profile_text", dto.UserProfile.ProfileText ?? (object)DBNull.Value);
 
             var affected = cmd.ExecuteNonQuery();
             if (affected == 0)

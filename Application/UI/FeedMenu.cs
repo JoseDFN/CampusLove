@@ -27,7 +27,7 @@ namespace SGCI_app.application.UI
             IMatchRepository matchRepo = new ImpMatchRepository(connStr);
 
             _feedService = new FeedService(userRepo);
-            var matchService = new MatchService(matchRepo);
+            var matchService = new MatchService(matchRepo, userRepo, connStr);
             _interactionService = new InteractionService(interRepo, matchService);
         }
 
