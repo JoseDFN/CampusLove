@@ -304,6 +304,12 @@ namespace CampusLove.Infrastructure.Repositories
           AND u.age           BETWEEN @minAge AND @maxAge
           AND a.city_id        = @cityId
           AND u.gender_id      = ANY(@genders)
+          AND NOT EXISTS (
+              SELECT 1 
+              FROM interaction i 
+              WHERE i.source_user_id = @uid 
+                AND i.target_user_id = u.user_id
+          )
         GROUP BY
             u.user_id, u.name, u.age, u.email, u.password_hash, u.gender_id, u.user_type_id,
             a.id, a.street, a.building_number, a.postal_code, a.city_id, a.additional_info,
