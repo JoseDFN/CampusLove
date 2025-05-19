@@ -50,4 +50,12 @@ public class ConexDBFactory : IDbfactory
     {
         return new ImpUserInterestsRepository(_connectionString);
     }
+    public IInteractionRepository CreateInteractionRepository()
+    {
+        return new ImpInteractionRepository(_connectionString);
+    }
+    public IMatchRepository CreateMatchRepository()
+    {
+        return new ImpMatchRepository(_connectionString);
+    }
 }

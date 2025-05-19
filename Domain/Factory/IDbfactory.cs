@@ -15,4 +15,6 @@ public interface IDbfactory
     ISexualOrientationRepository CreateSexualOrientationRepository();
     IInterestRepository CreateInterestRepository();
     IUserInterestRepository CreateUserInterestRepository();
+    IInteractionRepository CreateInteractionRepository();
+    IMatchRepository CreateMatchRepository();
 }
