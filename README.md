@@ -203,7 +203,7 @@ CREATE TABLE interaction_credits (
   credit_id SERIAL,
   user_id INT,
   on_date DATE NOT NULL,
-  likes_available INT NOT NULL DEFAULT 5,
+  likes_available INT DEFAULT 5,
   CONSTRAINT pk_interaction_credits PRIMARY KEY (credit_id),
   CONSTRAINT fk_interaction_credits_user FOREIGN KEY (user_id)
     REFERENCES app_user(user_id),
@@ -481,6 +481,7 @@ DECLARE
     v_address_id     INT;
     v_user_id        INT;
     v_preference_id  INT;
+    reset_fijo TIMESTAMP := (CURRENT_DATE AT TIME ZONE 'UTC') + INTERVAL '0 hour';
 BEGIN
     -- Insert en address
     INSERT INTO address(street, building_number, postal_code, city_id, additional_info)
@@ -500,6 +501,8 @@ BEGIN
     -- Insert en user_profile
     INSERT INTO user_profile(user_id, preference_id, profile_text, address_id, verified, status, updated_at)
     VALUES (v_user_id, v_preference_id, p_profile_text, v_address_id, p_verified, p_status, p_updated_at);
+    -- Insert en interaction_credits
+    INSERT INTO interaction_credits (user_id, on_date) VALUES (v_user_id, reset_fijo);
 
     RETURN v_user_id;
 END;
@@ -536,6 +539,8 @@ BEGIN
 
   -- 4) borrar el usuario
   DELETE FROM app_user WHERE user_id = p_user_id;
+
+  DELETE FROM interaction_credits WHERE user_id = p_user_id;
 
   -- Opcional: verificar que realmente borró algo
   IF NOT FOUND THEN
