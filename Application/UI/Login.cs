@@ -111,9 +111,7 @@ public class LoginUI : BaseMenu
                     Console.ReadKey();
                     break;
                 case "3":
-                    Console.WriteLine("Función de ver estadísticas en desarrollo...");
-                    Console.WriteLine("\nPresione cualquier tecla para continuar...");
-                    Console.ReadKey();
+                    MostrarEstadisticas(user);
                     break;
                 case "4":
                     ActualizarPerfilUsuario(user);
@@ -128,6 +126,99 @@ public class LoginUI : BaseMenu
             }
         }
     }
+
+    private void MostrarEstadisticas(DtoAppUser user)
+    {
+        try
+        {
+            Console.Clear();
+            ShowHeader("ESTADÍSTICAS DEL SISTEMA");
+
+            // Conexión y servicios
+            string connStr = "Host=localhost;Database=campus_love;Port=5432;Username=postgres;Password=1219;Pooling=true";
+            var interactionRepo = new ImpInteractionRepository(connStr);
+            var matchRepo = new ImpMatchRepository(connStr);
+            var userRepo = new ImpAppUserRepository(connStr);
+            var statsService = new StatisticsService(interactionRepo, matchRepo, userRepo, connStr);
+
+            // Estadísticas
+            var (totalLikes, totalMatches, matchRate) = statsService.GetSystemStatistics();
+            var (userLikes, userMatches, userMatchRate) = statsService.GetUserStatistics(user.UserId);
+
+            // Tabla comparativa
+            Console.WriteLine("\n=== COMPARATIVA DE ESTADÍSTICAS ===");
+            Console.WriteLine("{0,-35} {1,-15} {2,-15} {3}", "Métrica", "Tú", "Sistema", "Comparación");
+            Console.WriteLine(new string('-', 80));
+            Console.WriteLine("{0,-35} {1,-15} {2,-15} {3}",
+                "Likes enviados:",
+                userLikes.ToString("N0"),
+                totalLikes.ToString("N0"),
+                totalLikes > 0 ? $"{(double)userLikes / totalLikes * 100:F2}% del total" : "N/A");
+            Console.WriteLine("{0,-35} {1,-15} {2,-15} {3}",
+                "Matches generados:",
+                userMatches.ToString("N0"),
+                totalMatches.ToString("N0"),
+                totalMatches > 0 ? $"{(double)userMatches / totalMatches * 100:F2}% del total" : "N/A");
+            Console.WriteLine("{0,-35} {1,-15:F2}% {2,-15:F2}% {3}",
+                "Tasa de match (likes → match):",
+                userMatchRate,
+                matchRate,
+                userMatchRate > matchRate ? "Superior al promedio" :
+                userMatchRate < matchRate ? "Inferior al promedio" : "Igual al promedio");
+
+            // Visualización gráfica
+            Console.WriteLine("\nVisualización:");
+            MostrarBarra("Tus likes", userLikes, totalLikes);
+            MostrarBarra("Likes del sistema", totalLikes, totalLikes);
+
+            MostrarBarra("Tu tasa de match", userMatchRate, 100);
+            MostrarBarra("Tasa sistema", matchRate, 100);
+
+            // Feedback
+            Console.Write("\n");
+            if (userMatchRate > matchRate)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("🔼 Estás consiguiendo más matches por like que el promedio del sistema. ¡Buen trabajo!");
+            }
+            else if (userMatchRate < matchRate)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("🔽 Tu tasa de match está por debajo del promedio. ¡Sigue intentándolo!");
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("⏸️ Tu tasa de match está justo en el promedio del sistema.");
+            }
+            Console.ResetColor();
+
+            Console.WriteLine("\nPresione cualquier tecla para continuar...");
+            Console.ReadKey();
+        }
+        catch (Exception ex)
+        {
+            ShowErrorMessage($"Error al mostrar estadísticas: {ex.Message}");
+            Console.WriteLine("\nPresione cualquier tecla para continuar...");
+            Console.ReadKey();
+        }
+    }
+
+    // Método auxiliar para dibujar barras de progreso ASCII
+    private void MostrarBarra(string etiqueta, double valor, double total, int ancho = 35)
+    {
+        if (total <= 0)
+        {
+            Console.WriteLine($"{etiqueta,-25} [No disponible]");
+            return;
+        }
+
+        double porcentaje = (valor / total) * 100;
+        int llenado = (int)(ancho * porcentaje / 100);
+        string barra = new string('█', llenado) + new string('░', ancho - llenado);
+        Console.WriteLine($"{etiqueta,-25} [{barra}] {porcentaje,6:F2}%");
+    }
+
 
     private void ActualizarPerfilUsuario(DtoAppUser user)
     {
