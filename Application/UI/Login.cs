@@ -89,7 +89,7 @@ public class LoginUI : BaseMenu
         {
             Console.Clear();
             Console.WriteLine($"--- MENÚ USUARIO: {user.Name} ---");
-            Console.WriteLine("1. Ver perfiles");
+            Console.WriteLine("1. Ver Perfiles (Feed)");
             Console.WriteLine("2. Ver mis coincidencias");
             Console.WriteLine("3. Ver estadísticas del sistema");
             Console.WriteLine("4. Actualizar perfil");
@@ -101,9 +101,9 @@ public class LoginUI : BaseMenu
             switch (opcion)
             {
                 case "1":
-                    Console.WriteLine("Función de ver perfiles en desarrollo...");
-                    Console.WriteLine("\nPresione cualquier tecla para continuar...");
-                    Console.ReadKey();
+                    // Invocar FeedMenu
+                    var feedMenu = new FeedMenu(user.UserId);
+                    feedMenu.ShowMenu();
                     break;
                 case "2":
                     Console.WriteLine("Función de ver coincidencias en desarrollo...");
