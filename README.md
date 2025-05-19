@@ -223,6 +223,24 @@ CREATE TABLE user_statistics (
     REFERENCES app_user(user_id)
 );
 
+CREATE TABLE payment_method (
+  payment_method_id SERIAL,
+  description VARCHAR(50) NOT NULL UNIQUE,
+  CONSTRAINT pk_payment_method PRIMARY KEY (payment_method_id)
+);
+
+CREATE TABLE user_payment (
+  user_payment_id SERIAL,
+  card_number VARCHAR(20) NOT NULL,
+  user_id INT NOT NULL,
+  payment_method_id INT NOT NULL,
+  CONSTRAINT pk_user_payment PRIMARY KEY (user_payment_id),
+  CONSTRAINT fk_user_payment_user FOREIGN KEY (user_id)
+    REFERENCES app_user(user_id),
+  CONSTRAINT fk_user_payment_method FOREIGN KEY (payment_method_id)
+    REFERENCES payment_method(payment_method_id)
+);
+
 ```
 
  
@@ -388,7 +406,7 @@ INSERT INTO city (name, region_id) VALUES
 
 -- ========================================================
 -- DML: Populate domain tables
--- Tables: gender, sexual_orientation, career, interest, interaction_type
+-- Tables: gender, sexual_orientation, career, interest, interaction_type, payment_method
 -- ========================================================
 
 -- 1. Gender (Female and Male)
@@ -434,9 +452,16 @@ INSERT INTO interaction_type (description) VALUES
   ('Like'),
   ('Dislike');
 
+-- 6. User type
 INSERT INTO user_type (description) VALUES
   ('User'),
   ('Admin');
+
+-- 7. Payment methods
+INSERT INTO payment_method (description) VALUES
+('Visa'),
+('Mastercard'),
+('American Express');
 
 -- ========================================================
 -- DML: Insert Admin User

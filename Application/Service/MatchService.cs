@@ -62,7 +62,7 @@ namespace CampusLove.Application.Service
             var matches = new List<(Match, DtoAppUser)>();
 
             const string sql = @"
-                SELECT 
+                SELECT
                     m.match_id,
                     m.user1_id,
                     m.user2_id,
@@ -75,24 +75,23 @@ namespace CampusLove.Application.Service
                     up.profile_text,
                     up.verified,
                     COUNT(ui.interest_id) as common_interests,
-                    array_agg(i.description) as common_interest_names
+                    array_agg(i.description) FILTER (WHERE i.description IS NOT NULL) as common_interest_names
                 FROM match m
                 JOIN app_user u ON (
-                    CASE 
-                        WHEN m.user1_id = @userId THEN m.user2_id = u.user_id
-                        ELSE m.user1_id = u.user_id
-                    END
+                    CASE
+                        WHEN m.user1_id = @userId THEN m.user2_id
+                        ELSE m.user1_id
+                    END = u.user_id
                 )
-                JOIN user_profile up ON u.user_id = up.user_id
-                JOIN gender g ON u.gender_id = g.gender_id
-                JOIN address a ON up.address_id = a.id
-                JOIN city c ON a.city_id = c.id
+                JOIN user_profile up   ON u.user_id       = up.user_id
+                JOIN gender g          ON u.gender_id     = g.gender_id
+                JOIN address a         ON up.address_id   = a.id
+                JOIN city c            ON a.city_id       = c.id
                 LEFT JOIN user_interest ui ON ui.user_id = u.user_id
-                LEFT JOIN user_interest my_ui ON my_ui.user_id = @userId
+                LEFT JOIN user_interest my_ui ON my_ui.user_id = @userId AND ui.interest_id = my_ui.interest_id
                 LEFT JOIN interest i ON ui.interest_id = i.interest_id
                 WHERE (m.user1_id = @userId OR m.user2_id = @userId)
-                AND ui.interest_id = my_ui.interest_id
-                GROUP BY 
+                GROUP BY
                     m.match_id, m.user1_id, m.user2_id, m.matched_at,
                     u.user_id, u.name, u.age, g.description, c.name,
                     up.profile_text, up.verified
@@ -112,6 +111,8 @@ namespace CampusLove.Application.Service
                     MatchedAt = reader.GetDateTime(3)
                 };
 
+                var commonInterestNamesArray = reader.IsDBNull(12) ? new string[0] : (string[])reader.GetValue(12);
+
                 var matchedUser = new DtoAppUser
                 {
                     UserId = reader.GetInt32(4),
@@ -122,7 +123,7 @@ namespace CampusLove.Application.Service
                         ProfileText = reader.IsDBNull(9) ? null : reader.GetString(9),
                         Verified = reader.GetBoolean(10),
                         CommonInterestCount = reader.GetInt32(11),
-                        CommonInterestNames = reader.IsDBNull(12) ? new string[0] : (string[])reader.GetValue(12)
+                        CommonInterestNames = commonInterestNamesArray
                     }
                 };
 

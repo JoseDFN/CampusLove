@@ -10,6 +10,7 @@ using CampusLove.Domain.Ports;
 using CampusLove.Infrastructure.Repositories;
 using SGCI_app.application.UI;
 using CampusLove.Application.UI;
+using Npgsql;
 
 public class LoginUI : BaseMenu
 {
@@ -93,7 +94,8 @@ public class LoginUI : BaseMenu
             Console.WriteLine("2. Ver mis coincidencias");
             Console.WriteLine("3. Ver estadísticas del sistema");
             Console.WriteLine("4. Actualizar perfil");
-            Console.WriteLine("5. Salir");
+            Console.WriteLine("5. Tienda de Likes");
+            Console.WriteLine("6. Salir");
             Console.Write("\nSeleccione una opción: ");
             
             string opcion = Console.ReadLine()!;
@@ -101,7 +103,6 @@ public class LoginUI : BaseMenu
             switch (opcion)
             {
                 case "1":
-                    // Invocar FeedMenu
                     var feedMenu = new FeedMenu(user.UserId);
                     feedMenu.ShowMenu();
                     break;
@@ -115,6 +116,9 @@ public class LoginUI : BaseMenu
                     ActualizarPerfilUsuario(user);
                     break;
                 case "5":
+                    MostrarTiendaLikes(user);
+                    break;
+                case "6":
                     Console.WriteLine("Cerrando sesión...");
                     return;
                 default:
@@ -138,7 +142,7 @@ public class LoginUI : BaseMenu
             var userRepo = new ImpAppUserRepository(connStr);
             var matchService = new MatchService(matchRepo, userRepo, connStr);
 
-            // Obtener matches del usuario
+            // Obtener todos los matches del usuario
             var matches = matchService.GetUserMatches(user.UserId);
 
             if (matches.Count == 0)
@@ -149,47 +153,88 @@ public class LoginUI : BaseMenu
                 return;
             }
 
-            // Mostrar matches
-            Console.WriteLine($"\nTienes {matches.Count} coincidencias:");
-            Console.WriteLine(new string('-', 80));
+            // Lógica de paginación
+            int itemsPerPage = 1; // Changed to 1 to show one match per page
+            int totalItems = matches.Count;
+            int totalPages = (int)Math.Ceiling((double)totalItems / itemsPerPage);
+            int currentPage = 0; // Índice de página (0-based)
 
-            foreach (var (match, matchedUser) in matches)
+            while (true)
             {
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine($"\n{match.MatchedAt:dd/MM/yyyy HH:mm}");
-                Console.ResetColor();
+                Console.Clear();
+                ShowHeader($"MIS COINCIDENCIAS (Página {currentPage + 1}/{totalPages})");
 
-                Console.WriteLine($"Nombre: {matchedUser.Name}");
-                Console.WriteLine($"Edad: {matchedUser.Age} años");
-                Console.WriteLine($"Intereses en común: {matchedUser.UserProfile.CommonInterestCount}");
-                
-                if (matchedUser.UserProfile.CommonInterestNames.Length > 0)
+                int startIndex = currentPage * itemsPerPage;
+                int endIndex = Math.Min(startIndex + itemsPerPage, totalItems);
+
+                // Mostrar matches de la página actual (only one match per page now)
+                for (int i = startIndex; i < endIndex; i++)
                 {
-                    Console.WriteLine("\nIntereses compartidos:");
-                    foreach (var interest in matchedUser.UserProfile.CommonInterestNames)
+                    var (match, matchedUser) = matches[i];
+
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine($"\nMatch #{i + 1} ({match.MatchedAt:dd/MM/yyyy HH:mm})");
+                    Console.ResetColor();
+
+                    Console.WriteLine($"Nombre: {matchedUser.Name}");
+                    Console.WriteLine($"Edad: {matchedUser.Age} años");
+                    
+                    // Mostrar intereses en común si existen
+                    if (matchedUser.UserProfile.CommonInterestCount > 0)
                     {
-                        Console.WriteLine($"- {interest}");
+                         Console.WriteLine($"Intereses en común: {matchedUser.UserProfile.CommonInterestCount}");
+                         if (matchedUser.UserProfile.CommonInterestNames != null && matchedUser.UserProfile.CommonInterestNames.Length > 0)
+                         {
+                             Console.WriteLine("Intereses compartidos: " + string.Join(", ", matchedUser.UserProfile.CommonInterestNames));
+                         }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Intereses en común: 0");
+                    }
+
+                    // Mostrar texto de perfil si existe
+                    if (!string.IsNullOrEmpty(matchedUser.UserProfile.ProfileText))
+                    {
+                        Console.WriteLine($"Sobre mí: {matchedUser.UserProfile.ProfileText}");
+                    }
+
+                    // Mostrar estado de verificación
+                    if (matchedUser.UserProfile.Verified)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine("✓ Perfil verificado");
+                        Console.ResetColor();
+                    }
+
+                    DrawSeparator(); // Separador entre matches
+                }
+
+                // Opciones de navegación
+                Console.WriteLine("\n[P]ágina anterior [S]iguiente página [V]olver al menú");
+                Console.Write("Seleccione una opción: ");
+                
+                var input = Console.ReadKey(intercept: true).Key;
+
+                if (input == ConsoleKey.P)
+                {
+                    if (currentPage > 0)
+                    {
+                        currentPage--;
                     }
                 }
-                
-                if (!string.IsNullOrEmpty(matchedUser.UserProfile.ProfileText))
+                else if (input == ConsoleKey.S)
                 {
-                    Console.WriteLine($"\nSobre mí:");
-                    Console.WriteLine(matchedUser.UserProfile.ProfileText);
+                    if (currentPage < totalPages - 1)
+                    {
+                        currentPage++;
+                    }
                 }
-
-                if (matchedUser.UserProfile.Verified)
+                else if (input == ConsoleKey.V)
                 {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("✓ Perfil verificado");
-                    Console.ResetColor();
+                    return; // Volver al menú anterior
                 }
-
-                Console.WriteLine(new string('-', 80));
             }
-
-            Console.WriteLine("\nPresione cualquier tecla para continuar...");
-            Console.ReadKey();
         }
         catch (Exception ex)
         {
@@ -621,6 +666,291 @@ public class LoginUI : BaseMenu
             Console.ReadKey();
         }
     }
+
+    private void MostrarTiendaLikes(DtoAppUser user)
+    {
+        while (true)
+        {
+            Console.Clear();
+            ShowHeader("TIENDA DE LIKES");
+            Console.WriteLine("1. Validar usuario");
+            Console.WriteLine("2. Comprar likes");
+            Console.WriteLine("3. Salir");
+            Console.Write("\nSeleccione una opción: ");
+
+            string opcion = Console.ReadLine()!;
+
+            switch (opcion)
+            {
+                case "1":
+                    ValidarUsuario(user);
+                    break;
+                case "2":
+                    ComprarLikes(user);
+                    break;
+                case "3":
+                    return;
+                default:
+                    Console.WriteLine("Opción no válida. Presione cualquier tecla para continuar...");
+                    Console.ReadKey();
+                    break;
+            }
+        }
+    }
+
+    private void ValidarUsuario(DtoAppUser user)
+    {
+        try
+        {
+            string connStr = "Host=localhost;Database=campus_love;Port=5432;Username=postgres;Password=1219;Pooling=true";
+            
+            // Primero verificamos si el usuario ya está verificado
+            using (var conn = new NpgsqlConnection(connStr))
+            {
+                conn.Open();
+                const string checkVerifiedSql = "SELECT verified FROM user_profile WHERE user_id = @userId;";
+                using var checkCmd = new NpgsqlCommand(checkVerifiedSql, conn);
+                checkCmd.Parameters.AddWithValue("userId", user.UserId);
+                bool isVerified = Convert.ToBoolean(checkCmd.ExecuteScalar());
+
+                if (isVerified)
+                {
+                    ShowInfoMessage("Tu usuario ya está verificado.");
+                    Console.WriteLine("\nPresione cualquier tecla para continuar...");
+                    Console.ReadKey();
+                    return;
+                }
+            }
+
+            Console.Clear();
+            ShowHeader("VALIDACIÓN DE USUARIO");
+            Console.WriteLine("Para validar tu usuario, necesitamos registrar un método de pago.");
+            Console.WriteLine("Recibirás 10 likes adicionales como recompensa.");
+
+            // Mostrar métodos de pago disponibles
+            List<(int Id, string Description)> paymentMethods = new List<(int, string)>();
+            using (var conn = new NpgsqlConnection(connStr))
+            {
+                conn.Open();
+                const string sql = "SELECT payment_method_id, description FROM payment_method ORDER BY payment_method_id;";
+                using var cmd = new NpgsqlCommand(sql, conn);
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    paymentMethods.Add((reader.GetInt32(0), reader.GetString(1)));
+                }
+            }
+
+            // Mostramos los métodos de pago
+            Console.WriteLine("\nMétodos de pago disponibles:");
+            foreach (var method in paymentMethods)
+            {
+                Console.WriteLine($"{method.Id}. {method.Description}");
+            }
+
+            int paymentMethodId = GetValidatedIntInput("\nSeleccione el método de pago: ", 1);
+            string cardNumber = GetValidatedInput("Ingrese el número de tarjeta: ");
+
+            // Realizamos la validación y actualización en una nueva conexión
+            using (var conn = new NpgsqlConnection(connStr))
+            {
+                conn.Open();
+                using var transaction = conn.BeginTransaction();
+                try
+                {
+                    // Registrar método de pago
+                    const string insertSql = @"
+                        INSERT INTO user_payment (card_number, user_id, payment_method_id)
+                        VALUES (@cardNumber, @userId, @paymentMethodId);";
+
+                    using var insertCmd = new NpgsqlCommand(insertSql, conn, transaction);
+                    insertCmd.Parameters.AddWithValue("cardNumber", cardNumber);
+                    insertCmd.Parameters.AddWithValue("userId", user.UserId);
+                    insertCmd.Parameters.AddWithValue("paymentMethodId", paymentMethodId);
+                    insertCmd.ExecuteNonQuery();
+
+                    // Actualizar estado de verificación
+                    const string updateVerifiedSql = @"
+                        UPDATE user_profile 
+                        SET verified = true 
+                        WHERE user_id = @userId;";
+
+                    using var updateVerifiedCmd = new NpgsqlCommand(updateVerifiedSql, conn, transaction);
+                    updateVerifiedCmd.Parameters.AddWithValue("userId", user.UserId);
+                    updateVerifiedCmd.ExecuteNonQuery();
+
+                    // Verificar si ya existe un registro para hoy
+                    const string checkCreditsSql = @"
+                        SELECT COUNT(*) 
+                        FROM interaction_credits 
+                        WHERE user_id = @userId AND on_date = CURRENT_DATE;";
+
+                    using var checkCreditsCmd = new NpgsqlCommand(checkCreditsSql, conn, transaction);
+                    checkCreditsCmd.Parameters.AddWithValue("userId", user.UserId);
+                    int creditsExist = Convert.ToInt32(checkCreditsCmd.ExecuteScalar());
+
+                    if (creditsExist > 0)
+                    {
+                        // Si existe, actualizar los likes disponibles
+                        const string updateLikesSql = @"
+                            UPDATE interaction_credits 
+                            SET likes_available = likes_available + 10 
+                            WHERE user_id = @userId AND on_date = CURRENT_DATE;";
+
+                        using var updateLikesCmd = new NpgsqlCommand(updateLikesSql, conn, transaction);
+                        updateLikesCmd.Parameters.AddWithValue("userId", user.UserId);
+                        updateLikesCmd.ExecuteNonQuery();
+                    }
+                    else
+                    {
+                        // Si no existe, crear nuevo registro
+                        const string insertCreditsSql = @"
+                            INSERT INTO interaction_credits (user_id, on_date, likes_available)
+                            VALUES (@userId, CURRENT_DATE, 10);";
+
+                        using var insertCreditsCmd = new NpgsqlCommand(insertCreditsSql, conn, transaction);
+                        insertCreditsCmd.Parameters.AddWithValue("userId", user.UserId);
+                        insertCreditsCmd.ExecuteNonQuery();
+                    }
+
+                    transaction.Commit();
+                    ShowSuccessMessage("¡Usuario validado exitosamente! Has recibido 10 likes adicionales.");
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+
+            Console.WriteLine("\nPresione cualquier tecla para continuar...");
+            Console.ReadKey();
+        }
+        catch (Exception ex)
+        {
+            ShowErrorMessage($"Error al validar usuario: {ex.Message}");
+            Console.WriteLine("\nPresione cualquier tecla para continuar...");
+            Console.ReadKey();
+        }
+    }
+
+    private void ComprarLikes(DtoAppUser user)
+    {
+        try
+        {
+            Console.Clear();
+            ShowHeader("COMPRAR LIKES");
+            Console.WriteLine("Paquetes disponibles:");
+            Console.WriteLine("1. 3 likes - $40.000");
+            Console.WriteLine("2. 5 likes - $60.000");
+            Console.WriteLine("3. 10 likes - $100.000");
+
+            int opcion = GetValidatedIntInput("\nSeleccione el paquete: ", 1, 3);
+            int likes, precio;
+            
+            switch (opcion)
+            {
+                case 1:
+                    likes = 3;
+                    precio = 40000;
+                    break;
+                case 2:
+                    likes = 5;
+                    precio = 60000;
+                    break;
+                case 3:
+                    likes = 10;
+                    precio = 100000;
+                    break;
+                default:
+                    throw new ArgumentException("Opción no válida");
+            }
+
+            Console.WriteLine($"\n¿Desea confirmar la compra de {likes} likes por ${precio:N0}? (Y/N)");
+            string confirmacion = GetValidatedInput("").ToUpper();
+
+            if (confirmacion == "Y")
+            {
+                string connStr = "Host=localhost;Database=campus_love;Port=5432;Username=postgres;Password=1219;Pooling=true";
+                using (var conn = new NpgsqlConnection(connStr))
+                {
+                    conn.Open();
+                    using var transaction = conn.BeginTransaction();
+                    try
+                    {
+                        // Verificar si el usuario tiene método de pago registrado
+                        const string checkSql = "SELECT COUNT(*) FROM user_payment WHERE user_id = @userId;";
+                        using var checkCmd = new NpgsqlCommand(checkSql, conn, transaction);
+                        checkCmd.Parameters.AddWithValue("userId", user.UserId);
+                        int paymentMethods = Convert.ToInt32(checkCmd.ExecuteScalar());
+
+                        if (paymentMethods == 0)
+                        {
+                            throw new InvalidOperationException("Debe registrar un método de pago antes de realizar compras.");
+                        }
+
+                        // Verificar si ya existe un registro para hoy
+                        const string checkCreditsSql = @"
+                            SELECT COUNT(*) 
+                            FROM interaction_credits 
+                            WHERE user_id = @userId AND on_date = CURRENT_DATE;";
+
+                        using var checkCreditsCmd = new NpgsqlCommand(checkCreditsSql, conn, transaction);
+                        checkCreditsCmd.Parameters.AddWithValue("userId", user.UserId);
+                        int creditsExist = Convert.ToInt32(checkCreditsCmd.ExecuteScalar());
+
+                        if (creditsExist > 0)
+                        {
+                            // Si existe, actualizar los likes disponibles
+                            const string updateLikesSql = @"
+                                UPDATE interaction_credits 
+                                SET likes_available = likes_available + @likes 
+                                WHERE user_id = @userId AND on_date = CURRENT_DATE;";
+
+                            using var updateLikesCmd = new NpgsqlCommand(updateLikesSql, conn, transaction);
+                            updateLikesCmd.Parameters.AddWithValue("likes", likes);
+                            updateLikesCmd.Parameters.AddWithValue("userId", user.UserId);
+                            updateLikesCmd.ExecuteNonQuery();
+                        }
+                        else
+                        {
+                            // Si no existe, crear nuevo registro
+                            const string insertCreditsSql = @"
+                                INSERT INTO interaction_credits (user_id, on_date, likes_available)
+                                VALUES (@userId, CURRENT_DATE, @likes);";
+
+                            using var insertCreditsCmd = new NpgsqlCommand(insertCreditsSql, conn, transaction);
+                            insertCreditsCmd.Parameters.AddWithValue("userId", user.UserId);
+                            insertCreditsCmd.Parameters.AddWithValue("likes", likes);
+                            insertCreditsCmd.ExecuteNonQuery();
+                        }
+
+                        transaction.Commit();
+                        ShowSuccessMessage($"¡Compra exitosa! Has adquirido {likes} likes adicionales.");
+                    }
+                    catch (Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
+            }
+            else
+            {
+                ShowInfoMessage("Compra cancelada.");
+            }
+
+            Console.WriteLine("\nPresione cualquier tecla para continuar...");
+            Console.ReadKey();
+        }
+        catch (Exception ex)
+        {
+            ShowErrorMessage($"Error al procesar la compra: {ex.Message}");
+            Console.WriteLine("\nPresione cualquier tecla para continuar...");
+            Console.ReadKey();
+        }
+    }
+
     public override void ShowMenu()
     {
         Login();
