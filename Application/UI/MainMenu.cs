@@ -5,7 +5,6 @@ using CampusLove.Domain.DTO;
 using CampusLove.Domain.Entities;
 using CampusLove.Infrastructure.Repositories;
 using CampusLove.Infrastructure.Scheduling;
-using SGCI_app.application.UI;
 
 namespace CampusLove.ConsoleApp
 {

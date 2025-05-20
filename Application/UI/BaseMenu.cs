@@ -1,7 +1,7 @@
 using System;
 using Figgle;
 
-namespace SGCI_app.application.UI
+namespace CampusLove.Application.UI
 {
     public abstract class BaseMenu
     {

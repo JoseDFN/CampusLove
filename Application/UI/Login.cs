@@ -8,7 +8,6 @@ using CampusLove.Domain.DTO;
 using CampusLove.Domain.Entities;
 using CampusLove.Domain.Ports;
 using CampusLove.Infrastructure.Repositories;
-using SGCI_app.application.UI;
 using CampusLove.Application.UI;
 using Npgsql;
 
@@ -208,6 +207,11 @@ public class LoginUI : BaseMenu
                     }
 
                     DrawSeparator(); // Separador entre matches
+
+                    Console.WriteLine("[C]hatear  [N]ext");
+                    var key = Console.ReadKey(true).Key;
+                    if (key == ConsoleKey.C)
+                        new ChatMenu(match.MatchId, user.UserId).ShowMenu();
                 }
 
                 // Opciones de navegación

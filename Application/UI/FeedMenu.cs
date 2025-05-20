@@ -7,7 +7,7 @@ using CampusLove.Domain.Ports;
 using CampusLove.Infrastructure.Repositories;
 using Npgsql;
 
-namespace SGCI_app.application.UI
+namespace CampusLove.Application.UI
 {
     public class FeedMenu : BaseMenu
     {

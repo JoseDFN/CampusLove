@@ -18,4 +18,5 @@ public interface IDbfactory
     IInteractionRepository CreateInteractionRepository();
     IMatchRepository CreateMatchRepository();
     IInteractionCreditsRepository CreateInteractionCreditsRepository();
+    IChatMessageRepository CreateChatMessageRepository();
 }

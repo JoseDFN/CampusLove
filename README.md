@@ -246,6 +246,14 @@ CREATE TABLE system_events (
   last_run   DATE NOT NULL
 );
 
+CREATE TABLE chat_message (
+  message_id   SERIAL   PRIMARY KEY,
+  match_id     INT      NOT NULL REFERENCES "match"(match_id),
+  sender_id    INT      NOT NULL REFERENCES app_user(user_id),
+  text         TEXT     NOT NULL,
+  sent_at      TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 ```
 
  
