@@ -241,6 +241,11 @@ CREATE TABLE user_payment (
     REFERENCES payment_method(payment_method_id)
 );
 
+CREATE TABLE system_events (
+  event_name TEXT PRIMARY KEY,
+  last_run   DATE NOT NULL
+);
+
 ```
 
  
@@ -462,6 +467,11 @@ INSERT INTO payment_method (description) VALUES
 ('Visa'),
 ('Mastercard'),
 ('American Express');
+
+-- Inicializa el registro para tu evento de reset diario
+INSERT INTO system_events(event_name, last_run)
+VALUES ('ResetLikesDaily', '1970-01-01')
+ON CONFLICT (event_name) DO NOTHING;
 
 -- ========================================================
 -- DML: Insert Admin User

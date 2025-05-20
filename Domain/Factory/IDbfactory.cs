@@ -17,4 +17,5 @@ public interface IDbfactory
     IUserInterestRepository CreateUserInterestRepository();
     IInteractionRepository CreateInteractionRepository();
     IMatchRepository CreateMatchRepository();
+    IInteractionCreditsRepository CreateInteractionCreditsRepository();
 }
