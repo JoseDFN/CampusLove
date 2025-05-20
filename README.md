@@ -1,7 +1,96 @@
-# Campus Love
+# Campus Love 💕
 
-## DDL
+¡Bienvenido a Campus Love! Una aplicación de citas diseñada específicamente para el entorno universitario, donde podrás encontrar tu próximo amor mientras estudias.
 
+## 📋 Tabla de Contenidos
+- [Requisitos](#requisitos)
+- [Instalación](#instalación)
+- [Configuración de la Base de Datos](#configuración-de-la-base-de-datos)
+- [Estructura del Proyecto](#estructura-del-proyecto)
+- [Diagrama ER](#diagrama-er)
+- [Scripts SQL](#scripts-sql)
+- [Tecnologías Utilizadas](#tecnologías-utilizadas)
+- [Contacto](#contacto)
+
+## 🚀 Requisitos
+- .NET 8.0 SDK
+- PostgreSQL 12 o superior
+- Visual Studio 2022 o Visual Studio Code
+
+## 💻 Instalación
+
+1. Clona el repositorio:
+```bash
+git clone https://github.com/tu-usuario/campus-love.git
+cd campus-love
+```
+
+2. Restaura las dependencias:
+```bash
+dotnet restore
+```
+
+3. Compila el proyecto:
+```bash
+dotnet build
+```
+
+## 🗄️ Configuración de la Base de Datos
+
+### Opción 1: Usar la contraseña del proyecto
+Si deseas usar la contraseña predeterminada del proyecto (1219), ejecuta el siguiente comando en PostgreSQL:
+
+```sql
+ALTER USER postgres WITH PASSWORD '1219';
+```
+
+### Opción 2: Cambiar la contraseña en el proyecto
+Si prefieres usar tu propia contraseña, modifica la cadena de conexión en los siguientes archivos:
+- `Application/UI/MainMenu.cs`
+- `Application/UI/CountryMenu.cs`
+- `Application/UI/RegionMenu.cs`
+- `Application/UI/CityMenu.cs`
+- `Application/UI/CareerMenu.cs`
+- `Application/UI/InterestMenu.cs`
+- `Application/UI/UserTypeMenu.cs`
+- `Application/UI/SexualOrientationMenu.cs`
+- `Application/UI/UserCareerMenu.cs`
+- `Application/UI/UserInterestMenu.cs`
+
+Busca la línea que contiene:
+```csharp
+string connStr = "Host=localhost;Database=campus_love;Port=5432;Username=postgres;Password=1219;Pooling=true";
+```
+
+Y reemplaza `Password=1219` con tu contraseña.
+
+## 📁 Estructura del Proyecto
+```
+CampusLove/
+├── Application/         # Capa de aplicación
+│   ├── Service/        # Servicios de negocio
+│   └── UI/            # Interfaces de usuario
+├── Domain/             # Capa de dominio
+│   ├── Entities/      # Entidades del dominio
+│   ├── DTO/           # Objetos de transferencia de datos
+│   └── Ports/         # Puertos (interfaces)
+└── Infrastructure/     # Capa de infraestructura
+    └── Repositories/  # Implementaciones de repositorios
+```
+
+## 📁 Estructura del Repositorio
+
+- `Diagrama Entidad - Relacion` - Muestra la relacion entre las entidades de la base de datos.
+- `DDL.sql` - Contiene las sentencias para la creación de la base de datos y todas sus tablas.
+- `DML.sql` - Contiene la inserción de datos de ejemplo para poblar la base de datos.
+- `Procedimientos.sql` - Contiene los procedimientos almacenados utilizados por la aplicación.
+
+## 📊 Diagrama ER
+![alt text](diagramaER.jpg)
+
+## 📜 Scripts SQL
+
+### DDL - Definición de la Base de Datos
 ```sql
 -- Crear base de datos
 DROP DATABASE IF EXISTS campus_love;
@@ -254,12 +343,12 @@ CREATE TABLE chat_message (
   sent_at      TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+-- Se valida que se creen 42 filas entre tablas y secuencias
+\d
+
 ```
 
- 
-
-## DML
-
+### DML - Datos de Ejemplo
 ```sql
 \c campus_love;
 
@@ -489,10 +578,92 @@ ON CONFLICT (event_name) DO NOTHING;
 -- 1. Insert admin user (password '1234' hashed with BCrypt)
 INSERT INTO app_user (name, age, email, password_hash, gender_id, user_type_id)
 VALUES ('Admin', 30, 'admin', '$2a$11$SORgL6cP0GuiK1phmFzTY.V.J857dzWysZ9XlalOG/HzMi5jKYrAm', 1, 2);
+
+-- 2. Insert users (password hash is '1234' for all users)
+INSERT INTO app_user (name, age, email, password_hash, gender_id, user_type_id) VALUES
+('Juan', 22, 'juanfc.iq@gmail.com', '$2a$11$SORgL6cP0GuiK1phmFzTY.V.J857dzWysZ9XlalOG/HzMi5jKYrAm', 2, 1),
+('Laura', 21, 'laura@email.com', '$2a$11$SORgL6cP0GuiK1phmFzTY.V.J857dzWysZ9XlalOG/HzMi5jKYrAm', 1, 1),
+('Carlos', 23, 'profejuancarlosfc@gmail.com', '$2a$11$SORgL6cP0GuiK1phmFzTY.V.J857dzWysZ9XlalOG/HzMi5jKYrAm', 2, 1),
+('Andrea', 20, 'andrea@email.com', '$2a$11$SORgL6cP0GuiK1phmFzTY.V.J857dzWysZ9XlalOG/HzMi5jKYrAm', 1, 1),
+('Jose', 24, 'jose.david.florez.navarrete@gmail.com', '$2a$11$SORgL6cP0GuiK1phmFzTY.V.J857dzWysZ9XlalOG/HzMi5jKYrAm', 2, 1);
+
+-- 3. Insert preferences for each user
+INSERT INTO preference (orientation_id, min_age, max_age) VALUES
+(1, 18, 25), -- Juan's preference
+(1, 20, 28), -- Laura's preference
+(1, 19, 26), -- Carlos's preference
+(1, 21, 27), -- Andrea's preference
+(1, 20, 29); -- Jose's preference
+
+-- 4. Insert addresses (using Bogotá as city_id = 1)
+INSERT INTO address (street, building_number, postal_code, city_id, additional_info) VALUES
+('Calle 123', '45A', '110111', 1, 'Apto 302'),
+('Carrera 45', '67B', '110222', 1, 'Casa 2'),
+('Avenida 7', '89C', '110333', 1, 'Apto 501'),
+('Calle 90', '12D', '110444', 1, 'Casa 3'),
+('Carrera 34', '56E', '110555', 1, 'Apto 201');
+
+-- 5. Insert user profiles
+INSERT INTO user_profile (user_id, preference_id, profile_text, address_id, verified, status) VALUES
+(2, 1, 'Estudiante de Ingeniería de Sistemas', 1, TRUE, 'active'),
+(3, 2, 'Estudiante de Medicina', 2, FALSE, 'active'),
+(4, 3, 'Estudiante de Derecho', 3, FALSE, 'active'),
+(5, 4, 'Estudiante de Psicología', 4, FALSE, 'active'),
+(6, 5, 'Estudiante de Administración', 5, FALSE, 'active');
+
+-- 6. Insert user careers
+INSERT INTO user_career (user_id, career_id) VALUES
+(2, 1), -- Juan - Systems Engineering
+(3, 2), -- Laura - Medicine
+(4, 3), -- Carlos - Law
+(5, 5), -- Andrea - Psychology
+(6, 4); -- Jose - Business Administration
+
+-- 7. Insert user interests
+INSERT INTO user_interest (user_id, interest_id) VALUES
+(2, 1), (2, 2), (2, 6), -- Juan: Sports, Music, Technology
+(3, 2), (3, 4), (3, 7), -- Laura: Music, Travel, Gastronomy
+(4, 1), (4, 3), (4, 5), -- Carlos: Sports, Reading, Cinema
+(5, 3), (5, 7), (5, 10), -- Andrea: Reading, Gastronomy, Art
+(6, 1), (6, 6), (6, 9); -- Jose: Sports, Technology, Video Games
+
+-- 8. Insert interactions (only between Juan and Laura)
+INSERT INTO interaction (source_user_id, target_user_id, interaction_type_id) VALUES
+(2, 3, 1), -- Juan likes Laura
+(3, 2, 1); -- Laura likes Juan
+
+-- 9. Insert match between Juan and Laura
+INSERT INTO match (user1_id, user2_id) VALUES
+(2, 3);
+
+-- 10. Insert user_match relationships
+INSERT INTO user_match (user_id, match_id) VALUES
+(2, 1), -- Juan in match 1
+(3, 1); -- Laura in match 1
+
+-- 11. Insert interaction credits for all users
+INSERT INTO interaction_credits (user_id, on_date, likes_available) VALUES
+(2, CURRENT_DATE, 3), -- Juan has used 2 likes
+(3, CURRENT_DATE, 3), -- Laura has used 2 likes
+(4, CURRENT_DATE, 5), -- Carlos hasn't used any likes
+(5, CURRENT_DATE, 5), -- Andrea hasn't used any likes
+(6, CURRENT_DATE, 5); -- Jose hasn't used any likes
+
+-- 12. Insert user statistics
+INSERT INTO user_statistics (user_id, likes_given, likes_received, total_matches, last_interaction_at) VALUES
+(2, 1, 1, 1, CURRENT_TIMESTAMP), -- Juan
+(3, 1, 1, 1, CURRENT_TIMESTAMP), -- Laura
+(4, 0, 0, 0, NULL), -- Carlos
+(5, 0, 0, 0, NULL), -- Andrea
+(6, 0, 0, 0, NULL); -- Jose
+
+-- 13. Insert payment method for Juan (the validated user)
+INSERT INTO user_payment (card_number, user_id, payment_method_id) VALUES
+('4111111111111111', 2, 1); -- Juan's Visa card
+
 ```
 
-## Procedures And Functions
-
+### Procedimientos Almacenados
 ```sql
 CREATE OR REPLACE FUNCTION fn_create_app_user(
     -- Obligatorios primero
@@ -616,8 +787,20 @@ BEGIN
   END IF;
 END;
 $$;
-
-
-
 ```
+
+## 🛠️ Tecnologías Utilizadas
+- **Backend**: .NET 8.0
+- **Base de Datos**: PostgreSQL
+- **Lenguaje**: C#
+- **Paquetes NuGet**:
+  - BCrypt.Net-Next (4.0.3)
+  - Figgle (0.5.1)
+  - Newtonsoft.Json (13.0.3)
+  - Npgsql (9.0.3)
+
+## 📫 Contacto
+¿Tienes preguntas, sugerencias o quieres colaborar? No dudes en abrir un issue o enviar un pull request.
+
+¡Gracias por usar Campus Love! 💕
 
