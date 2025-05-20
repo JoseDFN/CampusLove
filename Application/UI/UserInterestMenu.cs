@@ -4,7 +4,6 @@ using CampusLove.Application.Service;
 using CampusLove.Domain.Entities;
 using CampusLove.Domain.Ports;
 using CampusLove.Infrastructure.Repositories;
-using SGCI_app.application.UI;
 
 namespace CampusLove.Application.UI
 {

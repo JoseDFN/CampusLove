@@ -4,7 +4,7 @@ using CampusLove.Application.UI;
 using CampusLove.Domain.DTO;
 using CampusLove.Domain.Entities;
 using CampusLove.Infrastructure.Repositories;
-using SGCI_app.application.UI;
+using CampusLove.Infrastructure.Scheduling;
 
 namespace CampusLove.ConsoleApp
 {
@@ -14,6 +14,9 @@ namespace CampusLove.ConsoleApp
         private readonly CareerService _careerService;
         private readonly UserCareerService _userCareerService;
         private readonly UserInterestService _userInterestService;
+        private readonly InteractionCreditsService _creditsService;
+        private readonly DailyInteractionCreditsScheduler _scheduler;
+        private readonly CancellationTokenSource _cts;
 
         public MainMenu() : base(showIntro: true)
         {
@@ -25,6 +28,18 @@ namespace CampusLove.ConsoleApp
             _userCareerService = new UserCareerService(new ImpUserCareerRepository(connStr));
             _careerService = new CareerService(new ImpCareerRepository(connStr));
             _userInterestService = new UserInterestService(new ImpUserInterestsRepository(connStr));
+
+            // Repositorio, servicio de créditos y scheduler
+            var creditsRepo = new ImpInteractionCreditsRepository(connStr);
+            _creditsService = new InteractionCreditsService(creditsRepo);
+            _scheduler = new DailyInteractionCreditsScheduler(_creditsService);
+            _cts = new CancellationTokenSource();
+
+            // **1. Al arrancar, asegúrate de que, si no se ha reseteado hoy, se ejecute el reset**
+            _creditsService.EnsureDailyReset();
+
+            // **2. Luego arranca el scheduler para futuras medianoches UTC**
+            _scheduler.Start(_cts.Token);
         }
 
         public override void ShowMenu()
@@ -48,6 +63,7 @@ namespace CampusLove.ConsoleApp
                         SignUpWithCareerFlow();
                         break;
                     case 0:
+                        _cts.Cancel();
                         return;
                 }
             }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using CampusLove.Application.Service;
 using CampusLove.Domain.Entities;
 using CampusLove.Infrastructure.Repositories;
-using SGCI_app.application.UI;
+using CampusLove.Application.UI;
 
 namespace CampusLove.Application.UI
 {

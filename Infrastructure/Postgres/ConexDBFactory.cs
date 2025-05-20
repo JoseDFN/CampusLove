@@ -58,4 +58,12 @@ public class ConexDBFactory : IDbfactory
     {
         return new ImpMatchRepository(_connectionString);
     }
+    public IInteractionCreditsRepository CreateInteractionCreditsRepository()
+    {
+        return new ImpInteractionCreditsRepository(_connectionString);
+    }
+    public IChatMessageRepository CreateChatMessageRepository()
+    {
+        return new ImpChatMessageRepository(_connectionString);
+    }
 }
